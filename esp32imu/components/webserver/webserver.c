@@ -84,10 +84,15 @@ static void set_content_type(httpd_req_t *req, const char *filepath)
         httpd_resp_set_type(req, "application/javascript");
     else if (strstr(filepath, ".css"))
         httpd_resp_set_type(req, "text/css");
+    else if (strstr(filepath, ".json"))
+        httpd_resp_set_type(req, "application/json");
 }
 //----------------------------------------------------------------------
 static esp_err_t file_get_handler(httpd_req_t *req)
 {
+    ESP_LOGI(TAG, "file_get_handler[%s]", req->uri);
+
+    //------------------------------------------------------------------
     // Проверка длинны пути файла
     if (strlen(req->uri) > (FILEPATH_MAX - 3))
     {
@@ -95,6 +100,7 @@ static esp_err_t file_get_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
+    //------------------------------------------------------------------
     // защита от ../ (path traversal):
     if (strstr(req->uri, ".."))
     {
@@ -102,8 +108,24 @@ static esp_err_t file_get_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
+    //------------------------------------------------------------------
     char filepath[FILEPATH_MAX];
-    int filepath_len = snprintf(filepath, sizeof(filepath), "/fs%s", req->uri);
+    int filepath_len = 0;
+
+    // если корень — отдаём index.html
+    if (strcmp(req->uri, "/") == 0)
+    {
+        // strcpy(filepath, "/web/index.html");
+        filepath_len = snprintf(filepath, sizeof(filepath), "%s%s", FS_WEBSERVER_PATH, "/index.html");
+
+        ESP_LOGI(TAG, "file_get_handler root filepath[%s]", filepath);
+    }
+    else
+    {
+        filepath_len = snprintf(filepath, sizeof(filepath), "%s%s", FS_WEBSERVER_PATH, req->uri);
+
+        ESP_LOGI(TAG, "file_get_handler filepath[%s]", filepath);
+    }
 
     if (filepath_len < 0 || filepath_len >= sizeof(filepath))
     {
@@ -111,20 +133,22 @@ static esp_err_t file_get_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
+    //------------------------------------------------------------------
+    // вставляем MIME-типы
+    set_content_type(req, filepath);
+
+    //------------------------------------------------------------------
     char gz_path[FILEPATH_MAX];
     int gz_len = snprintf(gz_path, sizeof(gz_path), "%s.gz", filepath);
 
     if (gz_len < 0 || gz_len >= sizeof(gz_path))
     {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Path too long");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Path gz too long");
         return ESP_FAIL;
     }
 
-    // // если корень — отдаём index.html
-    // if (strcmp(req->uri, "/") == 0)
-    // {
-    //     strcpy(filepath, "/spiffs/index.html");
-    // }
+    //------------------------------------------------------------------
+    ESP_LOGI(TAG, "file_get_handler gz_path[%s]", gz_path);
 
     FILE *f = fopen(gz_path, "r");
     if (f)
@@ -141,21 +165,21 @@ static esp_err_t file_get_handler(httpd_req_t *req)
         httpd_resp_send_404(req);
         return ESP_FAIL;
     }
+    /*
+        //------------------------------------------------------------------
+        // Добавление кэширования для не ".html" (JS/CSS...) файлов
+        if (strstr(filepath, ".html"))
+        {
+            httpd_resp_set_type(req, "text/html");
+            httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
+        }
+        else
+        {
+            httpd_resp_set_hdr(req, "Cache-Control", "max-age=86400");
+        }
+    */
 
-    // Добавление кэширования для не ".html" (JS/CSS...) файлов
-    if (strstr(filepath, ".html"))
-    {
-        httpd_resp_set_type(req, "text/html");
-        httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
-    }
-    else
-    {
-        httpd_resp_set_hdr(req, "Cache-Control", "max-age=86400");
-    }
-
-    // вставляем MIME-типы
-    set_content_type(req, filepath);
-
+    //------------------------------------------------------------------
     char chunk[1024];
     size_t read_bytes;
 
@@ -268,6 +292,20 @@ static void ws_ping_task(void *arg)
 //----------------------------------------------------------------------
 void start_webserver(QueueHandle_t queue)
 {
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.uri_match_fn = httpd_uri_match_wildcard;
+
+    if (httpd_start(&server, &config) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to start HTTP server");
+        return;
+    }
+
+    //------------------------------------------------------------------
+    // Обработчики регистрируются ниже и обрабатываются
+    // в порядке очередности регистрации.
+    // Обработчик .uri = "/*" вначале перекрыл бы все, по этому обрабатывается в конце
+    //------------------------------------------------------------------
     ws_queue = queue;
 
     ws_clients_mutex = xSemaphoreCreateMutex();
@@ -280,24 +318,27 @@ void start_webserver(QueueHandle_t queue)
     for (int i = 0; i < MAX_WS_CLIENTS; i++)
         ws_clients[i] = -1;
 
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    // WebSocket URI
+    httpd_uri_t ws = {
+        .uri = "/ws",
+        .method = HTTP_GET,
+        .handler = ws_handler,
+        .is_websocket = true};
 
-    if (httpd_start(&server, &config) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to start HTTP server");
-        return;
-    }
-
+    httpd_register_uri_handler(server, &ws);
     //------------------------------------------------------------------
-    // корневой URI
-    // httpd_uri_t root = {
-    //     .uri = "/",
-    //     .method = HTTP_GET,
-    //     .handler = root_get_handler};
-    // httpd_register_uri_handler(server, &root);
+    /*
+        // корневой URI
+        httpd_uri_t root = {
+            .uri = "/",
+            .method = HTTP_GET,
+            .handler = root_get_handler
+        };
 
+        httpd_register_uri_handler(server, &root);
+    */
     //------------------------------------------------------------------
-    // файлы из SPIFFS
+    // файлы из FS
     httpd_uri_t file_uri = {
         .uri = "/*",
         .method = HTTP_GET,
@@ -305,15 +346,6 @@ void start_webserver(QueueHandle_t queue)
     };
 
     httpd_register_uri_handler(server, &file_uri);
-
-    //------------------------------------------------------------------
-    // WebSocket URI
-    httpd_uri_t ws = {
-        .uri = "/ws",
-        .method = HTTP_GET,
-        .handler = ws_handler,
-        .is_websocket = true};
-    httpd_register_uri_handler(server, &ws);
 
     //------------------------------------------------------------------
     // xTaskCreate(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL);

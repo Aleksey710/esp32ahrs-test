@@ -28,8 +28,12 @@ idf_component_register(
 )
 #-----------------------------------------------------------------------
 # Папки
-set(FRONTEND_DIR ${CMAKE_SOURCE_DIR}/frontend)
-set(GZ_DIR ${CMAKE_BINARY_DIR}/frontend_gz)
+# Общее хранилище
+set(STORAGE_DIR ${CMAKE_SOURCE_DIR}/storage)
+# web
+set(FRONTEND_DIR ${CMAKE_SOURCE_DIR}/storage)
+# web *.gz для ускоренной выдачи
+set(GZ_DIR ${CMAKE_BINARY_DIR}/storage)
 
 # 1. Копируем frontend → gz (с сохранением структуры)
 add_custom_command(
@@ -68,7 +72,7 @@ add_custom_target(
 # storage - имя раздела в partitions.csv
 #spiffs_create_partition_image(storage ${GZ_DIR} FLASH_IN_PROJECT)
 littlefs_create_partition_image(
-    fs ${GZ_DIR} FLASH_IN_PROJECT
+    storage ${GZ_DIR} FLASH_IN_PROJECT
 )
 
 # 5. Target для удаления gz после сборки образа

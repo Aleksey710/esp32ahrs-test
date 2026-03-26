@@ -27,7 +27,11 @@ Component config
 [*] WebSocket support
 
 ## Работа файловой системы
+Задать размер Flash size. (Зависит от контроллера)
 
+idf.py menuconfig
+
+→ Serial flasher config → Flash size → 16MB
 //----------------------------------------------------------------------
 # SPIFFS
 Включи в menuconfig:
@@ -76,18 +80,18 @@ idf.py build
 CONFIG_FS.h
 fs.c
 webserver.c
-partitions_littlefs.csv
+
+
+# где прописан FS_BASE_PATH
+partitions.csv
 main/CMakeLists.txt (littlefs_create_partition_image(
     fs ${GZ_DIR} FLASH_IN_PROJECT
 ))
-
-
 то это должно совпадать с:
-
 .partition_label = "storage"
 
-# где прописан partitions_littlefs.csv
-partitions_littlefs.csv
+# где прописан partitions.csv
+partitions.csv
 sdkconfig
 sdkconfig.defaults
 sdkconfig.old

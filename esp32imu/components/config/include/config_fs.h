@@ -3,9 +3,18 @@
 //----------------------------------------------------------------------
 #include <inttypes.h>
 //----------------------------------------------------------------------
-
+// максимальная длинна полного имени файла
 #define FILEPATH_MAX 256
-#define FS_BASE_PATH "/fs"
-#define FS_PARTITION_LABEL "/fs"
+
+// путь, по которому файловая система будет доступна в коде.
+// "/" нельзя
+#define FS_BASE_PATH "/storage"
+
+// каталог вебсервера = FS_BASE_PATH + "/folder_name"
+#define FS_WEBSERVER_PATH "/storage/web"
+
+// имя раздела во флешке, где лежит LittleFS.
+// Из файла partitions.csv(таблица разделов)
+#define FS_PARTITION_LABEL "storage"
 //----------------------------------------------------------------------
 #endif // CONFIG_FS_H
