@@ -11,7 +11,7 @@
 #define FS_BASE_PATH "/storage"
 
 // каталог вебсервера = FS_BASE_PATH + "/folder_name"
-#define FS_WEBSERVER_PATH "/storage/web"
+#define FS_WEBSERVER_PATH "/storage/frontend"
 
 // имя раздела во флешке, где лежит LittleFS.
 // Из файла partitions.csv(таблица разделов)
