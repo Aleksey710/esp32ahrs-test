@@ -237,19 +237,74 @@ static esp_err_t ws_handler(httpd_req_t *req)
 //----------------------------------------------------------------------
 static void ws_sender_task(void *arg)
 {
+    mpu_data_t test_data;
+
+    test_data.ax = 1.0f;
+    test_data.ay = 2.0f;
+    test_data.az = 3.0f;
+
+    test_data.gx = 0.1f;
+    test_data.gy = 0.2f;
+    test_data.gz = 0.3f;
+
+    test_data.x = 10.1f;
+    test_data.y = 20.2f;
+    test_data.z = 30.3f;
+
+    test_data.roll = 10.1f;
+    test_data.pitch = 20.2f;
+    test_data.yaw = 30.3f;
+
+    test_data.timestamp = 0;
+
+    xQueueSend(ws_queue, &test_data, portMAX_DELAY);
+    //---------
     mpu_data_t data;
 
     while (1)
     {
+        if (test_data.x < 1000)
+            test_data.x++;
+        else
+            test_data.x = 0;
+
+        if (test_data.y < 1000)
+            test_data.y++;
+        else
+            test_data.y = 0;
+
+        if (test_data.z < 1000)
+            test_data.z++;
+        else
+            test_data.z = 0;
+
+        if (test_data.timestamp < 1000)
+            test_data.timestamp++;
+        else
+            test_data.timestamp = 0;
+        xQueueSend(ws_queue, &test_data, portMAX_DELAY); // добавление тестовых данных
+
+        //--------------------
         if (xQueueReceive(ws_queue, &data, portMAX_DELAY))
         {
             cJSON *root = cJSON_CreateObject();
             cJSON_AddNumberToObject(root, "ax", data.ax);
             cJSON_AddNumberToObject(root, "ay", data.ay);
             cJSON_AddNumberToObject(root, "az", data.az);
+
             cJSON_AddNumberToObject(root, "gx", data.gx);
             cJSON_AddNumberToObject(root, "gy", data.gy);
             cJSON_AddNumberToObject(root, "gz", data.gz);
+
+            cJSON_AddNumberToObject(root, "x", data.x);
+            cJSON_AddNumberToObject(root, "y", data.y);
+            cJSON_AddNumberToObject(root, "z", data.z);
+
+            cJSON_AddNumberToObject(root, "roll", data.roll);
+            cJSON_AddNumberToObject(root, "pitch", data.pitch);
+            cJSON_AddNumberToObject(root, "yaw", data.yaw);
+
+            cJSON_AddNumberToObject(root, "timestamp", data.timestamp);
 
             char *json_str = cJSON_PrintUnformatted(root);
             cJSON_Delete(root);
@@ -384,7 +439,8 @@ void start_webserver(QueueHandle_t queue)
 
     //------------------------------------------------------------------
     // xTaskCreate(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL);
-    xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL, 0);
+    // xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 8192, NULL, 5, NULL, 0);
 
     // xTaskCreate(ws_ping_task, "ws_ping", 2048, NULL, 5, NULL);
     // xTaskCreatePinnedToCore(ws_ping_task, "ws_ping", 2048, NULL, 5, NULL, 0);
