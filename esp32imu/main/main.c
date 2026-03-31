@@ -8,6 +8,8 @@
 
 #include "wifi.h"
 #include "webserver.h"
+#include "i2c.h"
+
 // #include "ws_server.h"
 // #include "i2c_task.h"
 // #include "processing_task.h"
@@ -44,6 +46,8 @@ void app_main(void)
     //------------------------------------------------------------------
     // --- CORE 1 ---
     ESP_LOGI(TAG, "CORE 1 initing");
+
+    i2c_master_init();
     /*
     xTaskCreatePinnedToCore(i2c_task, "i2c_task", 4096, (void*)i2c_queue, 6, NULL, 1);
     xTaskCreatePinnedToCore(processing_task, "processing_task", 4096, (void*)i2c_queue, 5, NULL, 1);
