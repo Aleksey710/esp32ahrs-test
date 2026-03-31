@@ -1,14 +1,21 @@
 #include "webserver.h"
 
+#include <string.h>
+#include <stdlib.h>
+#include <inttypes.h>
+
+// форматирование float для JSON
+#define FMT_F "%.2f"
+
 #include "esp_http_server.h"
 #include "esp_log.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
+
 #include "cJSON.h"
-#include <string.h>
-#include <stdlib.h>
 
 #include "config_fs.h"
 #include "fs.h"
@@ -18,17 +25,10 @@
 static const char *TAG = "WEBSERVER";
 
 static httpd_handle_t server = NULL;
-// static QueueHandle_t ws_queue;
 
 // Массив для хранения fd WebSocket клиентов
 static int ws_clients[MAX_WS_CLIENTS];
 static SemaphoreHandle_t ws_clients_mutex = NULL;
-
-// typedef struct
-// {
-//     int16_t ax, ay, az;
-//     int16_t gx, gy, gz;
-// } mpu_data_t;
 
 //----------------------------------------------------------------------
 static void ws_add_client(int fd)
@@ -58,6 +58,7 @@ static void ws_remove_client(int fd)
             break;
         }
     }
+
     xSemaphoreGive(ws_clients_mutex);
 }
 //----------------------------------------------------------------------
@@ -231,12 +232,15 @@ static esp_err_t ws_handler(httpd_req_t *req)
     //         ws_remove_client(fd);
     //         break;
     //     }
+    // // yeld - освобождение потока
+    // vTaskDelay(pdMS_TO_TICKS(1));
     // }
     return ESP_OK;
 }
 //----------------------------------------------------------------------
 static void ws_sender_task(void *arg)
 {
+
     mpu_data_t test_data;
 
     test_data.ax = 1.0f;
@@ -255,7 +259,7 @@ static void ws_sender_task(void *arg)
     test_data.pitch = 20.2f;
     test_data.yaw = 30.3f;
 
-    test_data.timestamp = 0;
+    // test_data.timestamp = 0;
 
     xQueueSend(ws_queue, &test_data, portMAX_DELAY);
     //---------
@@ -278,15 +282,17 @@ static void ws_sender_task(void *arg)
         else
             test_data.z = 0;
 
-        if (test_data.timestamp < 1000)
-            test_data.timestamp++;
-        else
-            test_data.timestamp = 0;
+        // if (test_data.timestamp < 1000)
+        //     test_data.timestamp++;
+        // else
+        //     test_data.timestamp = 0;
+
         xQueueSend(ws_queue, &test_data, portMAX_DELAY); // добавление тестовых данных
 
         //--------------------
         if (xQueueReceive(ws_queue, &data, portMAX_DELAY))
         {
+            /*
             cJSON *root = cJSON_CreateObject();
             cJSON_AddNumberToObject(root, "ax", data.ax);
             cJSON_AddNumberToObject(root, "ay", data.ay);
@@ -308,13 +314,28 @@ static void ws_sender_task(void *arg)
 
             char *json_str = cJSON_PrintUnformatted(root);
             cJSON_Delete(root);
-            if (!json_str)
+
+                        if (!json_str)
                 continue;
+            */
+            char json_str[256];
+
+            int json_str_len = snprintf(json_str, sizeof(json_str),
+                                        "{"
+                                        "\"ax\":" FMT_F ",\"ay\":" FMT_F ",\"az\":" FMT_F ","
+                                        "\"gx\":" FMT_F ",\"gy\":" FMT_F ",\"gz\":" FMT_F ","
+                                        "\"x\":" FMT_F ",\"y\":" FMT_F ",\"z\":" FMT_F ","
+                                        "\"roll\":" FMT_F ",\"pitch\":" FMT_F ",\"yaw\":" FMT_F
+                                        "}",
+                                        (double)data.ax, (double)data.ay, (double)data.az,
+                                        (double)data.gx, (double)data.gy, (double)data.gz,
+                                        (double)data.x, (double)data.y, (double)data.z,
+                                        (double)data.roll, (double)data.pitch, (double)data.yaw);
 
             httpd_ws_frame_t frame = {
                 .type = HTTPD_WS_TYPE_TEXT,
                 .payload = (uint8_t *)json_str,
-                .len = strlen(json_str)};
+                .len = json_str_len};
 
             xSemaphoreTake(ws_clients_mutex, portMAX_DELAY);
             for (int i = 0; i < MAX_WS_CLIENTS; i++)
@@ -333,8 +354,15 @@ static void ws_sender_task(void *arg)
             }
             xSemaphoreGive(ws_clients_mutex);
 
-            free(json_str);
+            // free(json_str);
+
+            vTaskDelay(pdMS_TO_TICKS(1));
         }
+        // ограничение частоты посылки
+        vTaskDelay(pdMS_TO_TICKS(20)); // 20 - 50 Hz
+
+        // yeld - освобождение потока
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 //----------------------------------------------------------------------

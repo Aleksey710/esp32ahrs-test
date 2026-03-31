@@ -1,0 +1,11 @@
+body {
+  font-size: 12px;
+}
+
+h1, h2, h3 {
+  page-break-after: avoid;
+}
+
+pre {
+  page-break-inside: avoid;
+}

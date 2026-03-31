@@ -1,0 +1,14 @@
+/* убираем UI элементы Material */
+.md-header,
+.md-tabs,
+.md-sidebar,
+.md-footer,
+.md-nav {
+  display: none !important;
+}
+
+/* убираем всё "вебовое" */
+* {
+  box-shadow: none !important;
+  transition: none !important;
+}

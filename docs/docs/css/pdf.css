@@ -1,0 +1,98 @@
+/* 📖 Общий стиль книги */
+body {
+  font-family: serif;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 2cm;
+  max-width: 100%;
+}
+
+/* 📘 Обложка */
+.cover {
+  text-align: center;
+  margin-top: 200px;
+}
+
+.cover h1 {
+  font-size: 36px;
+}
+
+.cover h2 {
+  font-size: 20px;
+  color: gray;
+}
+
+/* 📑 Заголовки */
+h1 {
+  page-break-before: always;
+  font-size: 26px;
+  border-bottom: 2px solid #000;
+  padding-bottom: 5px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+h3 {
+  font-size: 16px;
+}
+
+/* 📄 Нумерация страниц */
+@page {
+  margin: 2cm;
+
+  @bottom-center {
+    content: "Страница " counter(page);
+    font-size: 10px;
+  }
+
+  @top-right {
+    content: "ESP32 UAV Docs";
+    font-size: 10px;
+  }
+}
+
+/* 📊 Таблицы */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+th, td {
+  border: 1px solid #444;
+  padding: 6px;
+}
+
+th {
+  background: #ddd;
+}
+
+/* 💻 Код */
+pre {
+  font-size: 10px;
+  background: #f5f5f5;
+  padding: 10px;
+  border: 1px solid #ccc;
+  white-space: pre-wrap;
+}
+
+/* 🔗 Ссылки */
+a {
+  color: black;
+  text-decoration: none;
+}
+
+/* 🖼 Картинки */
+img {
+  max-width: 100%;
+  display: block;
+  margin: 10px auto;
+}
+
+/* 📌 Разрыв страницы */
+.pagebreak {
+  page-break-before: always;
+}

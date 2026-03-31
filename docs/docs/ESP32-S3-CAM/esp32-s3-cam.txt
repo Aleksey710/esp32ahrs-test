@@ -1,0 +1,34 @@
+https://community.home-assistant.io/t/esp32-s3-n16r8-camera-config/881270/3
+
+I’m using the following generic esp32 config and while it seems to be matching the pins, it does not work:
+
+esp32_camera:
+  external_clock:
+    pin: GPIO15
+    frequency: 20MHz
+  i2c_pins:
+    sda: GPIO4
+    scl: GPIO5
+  data_pins: [GPIO11, GPIO9, GPIO8, GPIO10, GPIO12, GPIO18, GPIO17, GPIO16]
+  vsync_pin: GPIO6
+  href_pin: GPIO7
+  pixel_clock_pin: GPIO13
+  name: "3D Printer CAM"
+Debug log:
+
+[08:39:39][C][esp32_camera:048]: ESP32 Camera:
+[08:39:39][C][esp32_camera:049]:   Name: 3D Printer CAM
+[08:39:39][C][esp32_camera:050]:   Internal: NO
+[08:39:39][C][esp32_camera:051]:   Framebuffer in PSRAM: YES
+[08:39:39][C][esp32_camera:053]:   Data Pins: D0:11 D1:9 D2:8 D3:10 D4:12 D5:18 D6:17 D7:16
+[08:39:39][C][esp32_camera:054]:   VSYNC Pin: 6
+[08:39:39][C][esp32_camera:055]:   HREF Pin: 7
+[08:39:39][C][esp32_camera:056]:   Pixel Clock Pin: 13
+[08:39:39][C][esp32_camera:057]:   External Clock: Pin:15 Frequency:20000000
+[08:39:39][C][esp32_camera:061]:   I2C Pins: SDA:4 SCL:5
+[08:39:39][C][esp32_camera:063]:   Reset Pin: -1
+[08:39:39][C][esp32_camera:081]:   Resolution: 640x480 (VGA)
+[08:39:39][E][esp32_camera:124]:   Setup Failed: ESP_FAIL
+[08:39:39][E][component:082]:   Component esp32_camera is marked FAILED: 
+[08:39:39][C][psram:017]: PSRAM:
+[08:39:39][C][psram:032]:   Available: NO
