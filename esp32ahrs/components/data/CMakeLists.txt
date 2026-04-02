@@ -5,16 +5,14 @@ idf_component_register(
         "IMU_data.c"
         "magnetometer_data.c"
         "AHRS_data.c"
-
         "ws_msg_ringbuf.c"
-
 
     INCLUDE_DIRS
         "include" 
 
 
     REQUIRES 
-        freertos
+        esp_ringbuf
         config
         # nvs_flash
         # esp_wifi 

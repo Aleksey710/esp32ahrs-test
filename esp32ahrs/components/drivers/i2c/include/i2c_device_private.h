@@ -24,7 +24,7 @@ struct _i2c_device
     i2c_device_config_t dev_cfg;
     i2c_master_dev_handle_t dev;
 
-    i2c_device_backend_t *backend;
+    const i2c_device_backend_t *backend;
 
     void *ctx;
 };

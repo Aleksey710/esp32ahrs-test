@@ -70,7 +70,7 @@ dependencies:
     source:
       path: components/esp_littlefs
       type: local
-    version: '*'
+    version: 1.20.4
   idf:
     source:
       type: idf
@@ -90,6 +90,6 @@ direct_dependencies:
 - esp_littlefs
 - idf
 - joltwallet/littlefs
-manifest_hash: 6a119c459e9edbae965fc6289dd1f359283bab99cf0221dd06da60ca774812df
+manifest_hash: dbb87d94aabeacdb4a41e6b5501004f0e91b321fdf28ad9ea8bd1324997f2bd7
 target: esp32s3
 version: 3.0.0

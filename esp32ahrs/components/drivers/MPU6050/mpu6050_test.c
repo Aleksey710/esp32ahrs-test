@@ -28,7 +28,7 @@ void mpu6050_test(void *pvParameters)
     mpu6050_dev_t dev = {0};
 
     ESP_ERROR_CHECK(mpu6050_init_desc(&dev,
-                                      DEVICE_ADDRESS::MPU6050_LOW,
+                                      I2C_DEV_ADDR_MPU6050_LOW,
                                       0,
                                       I2C_SDA_GPIO,
                                       I2C_SCL_GPIO));
@@ -67,10 +67,10 @@ void mpu6050_test(void *pvParameters)
         g.y = rotation.y;
         g.z = rotation.z;
 
-        Accelerometer_unit_data_t a;
-        a.x = accel.x;
-        a.y = accel.y;
-        a.z = accel.z;
+        // Accelerometer_unit_data_t a;
+        // a.x = accel.x;
+        // a.y = accel.y;
+        // a.z = accel.z;
 
         // ESP_LOGI(TAG, "**********************************************************************");
         // ESP_LOGI(TAG, "Acceleration: x=%.4f   y=%.4f   z=%.4f", accel.x, accel.y, accel.z);
@@ -111,8 +111,8 @@ void mpu6050_test(void *pvParameters)
             // msg->id = counter;
             // msg->len = strlen(msg->data) + 1;
 
-            // msg->len = accelerometer_data2json(msg->data, a);
-            msg->len = gyroscope_data2json(msg->data, a);
+            // msg->data.len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
+            msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
 
             // IMU_data_t imu;
             // imu.g = g;
@@ -121,11 +121,11 @@ void mpu6050_test(void *pvParameters)
             // msg->len = IMU_data2json(msg->data, a);
         }
 
-        if (xRingbufferSend(ws_message_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
+        if (xRingbufferSend(&ws_msg_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
         {
             ESP_LOGI(TAG, "Send failed");
             free_ws_msg(msg);
-            return ESP_ERR
+            return;
         }
         //--------------------
         vTaskDelay(pdMS_TO_TICKS(1));

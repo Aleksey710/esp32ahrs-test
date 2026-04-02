@@ -13,7 +13,6 @@
 #include "driver/i2c_master.h"
 
 #include "config.h"
-#include "data.h"
 
 //-----------------------------------
 // не менять последовательность
@@ -23,6 +22,8 @@
 
 #include "i2c_devices.h"
 #include "MPU6050.h"
+
+#include "ws_msg_ringbuf.h"
 //----------------------------------------------------------------------
 #define TAG "I2C"
 
@@ -97,7 +98,7 @@ void i2c_scan_and_register(void)
 //----------------------------------------------------------------------
 static void i2c_device_task(void *arg)
 {
-    device_data_t data;
+    Ws_msg_data_t data;
 
     while (1)
     {
@@ -107,10 +108,7 @@ static void i2c_device_task(void *arg)
 
             if (device->backend->read(device, &data) == ESP_OK)
             {
-                // ESP_LOGI(TAG,
-                //          "[%s] x=%.2f y=%.2f z=%.2f",
-                //          device->backend->name,
-                //          data.x, data.y, data.z);
+                ESP_LOGI(TAG, "[%s] %s", device->type_name, data.data);
 
                 // 👉 сюда можно отправку в очередь добавить
             }
@@ -126,8 +124,8 @@ void i2c_init(const int cpuid)
 
     i2c_master_bus_config_t bus_cfg = {
         .i2c_port = I2C_PORT,
-        .sda_io_num = I2C_SDA,
-        .scl_io_num = I2C_SCL,
+        .sda_io_num = I2C_SDA_GPIO,
+        .scl_io_num = I2C_SCL_GPIO,
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .flags.enable_internal_pullup = true,
     };

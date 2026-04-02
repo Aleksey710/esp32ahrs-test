@@ -48,7 +48,7 @@ void free_ws_msg(Ws_msg_t *msg)
 }
 //----------------------------------------------------------------------
 // положить сообщение в буффер
-
+/*
 esp_err_t send_ws_msg_to_buf(const Ws_msg_data_t &data)
 {
     Ws_msg_t *msg = alloc_ws_msg();
@@ -121,6 +121,7 @@ void consumer_task(void *arg)
         }
     }
 }
+*/
 //----------------------------------------------------------------------
 void ws_msg_ringbuf_setup(void)
 {
@@ -128,7 +129,7 @@ void ws_msg_ringbuf_setup(void)
 
     if (ws_msg_ringbuf == NULL)
     {
-        ESP_LOGI(TAG, "Failed to create ring buffer: %s", msg->data);
+        ESP_LOGI(TAG, "Failed to create ring buffer: ws_msg_ringbuf");
         return;
     }
 

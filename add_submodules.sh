@@ -8,10 +8,10 @@ set -e
 #.git/index	gitlink (ВАЖНО)
 #.git/modules	внутренний repo
 
-echo "===> Hard reset submodule state"
+#echo "===> Hard reset submodule state"
 
-git submodule deinit -f --all || true
-rm -rf .git/modules
+#git submodule deinit -f --all || true
+#rm -rf .git/modules
 
 echo "===> Sync submodules list..."
 
@@ -22,7 +22,7 @@ SUBMODULES=(
 )
 
 # 🧠 НЕ очищаем .gitmodules полностью!
-touch .gitmodules
+#touch .gitmodules
 
 for entry in "${SUBMODULES[@]}"; do
     IFS='|' read -r REPO_URL SUBMODULE_PATH <<< "$entry"

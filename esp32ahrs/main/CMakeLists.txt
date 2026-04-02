@@ -12,6 +12,7 @@ idf_component_register(
 		# esp_wifi 
 		# #mbedtls
 		# wt_libs
+		esp_ringbuf
 		# esp_driver_i2c
 		# esp_driver_spi
 		# esp_driver_gptimer

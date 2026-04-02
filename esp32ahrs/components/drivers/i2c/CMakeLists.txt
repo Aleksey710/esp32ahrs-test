@@ -11,6 +11,8 @@ idf_component_register(
 
     REQUIRES 
         driver
+        freertos
+        esp_ringbuf
         #esp_driver_i2c
         
         # esp_driver_spi

@@ -3,11 +3,10 @@
 //----------------------------------------------------------------------
 #include <inttypes.h>
 
+#include "freertos/ringbuf.h"
+
 #include "config.h"
 
-//----------------------------------------------------------------------
-#define WS_RINGBUF_MAX_DATA_SIZE 200
-#define WS_MSG_POOL_SIZE 10
 //----------------------------------------------------------------------
 typedef struct
 {
@@ -20,7 +19,8 @@ typedef struct
     int id;
     Ws_msg_data_t data;
 } Ws_msg_t;
-
+//----------------------------------------------------------------------
+static RingbufHandle_t ws_msg_ringbuf;
 //----------------------------------------------------------------------
 Ws_msg_t *alloc_ws_msg(void);
 void free_ws_msg(Ws_msg_t *msg);

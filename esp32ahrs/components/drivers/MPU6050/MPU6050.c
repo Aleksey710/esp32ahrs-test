@@ -10,6 +10,7 @@
 // #include "freertos/task.h"
 
 #include "esp_log.h"
+#include "esp_err.h"
 
 #include "driver/i2c_master.h"
 
@@ -73,13 +74,23 @@ static esp_err_t MPU6050_read(i2c_device_t *device, void *data)
     mpu6050_acceleration_t accel = {0};
     mpu6050_rotation_t rotation = {0};
 
-    ESP_ERROR_CHECK(mpu6050_get_temperature(device, &temp));
-    ESP_ERROR_CHECK(mpu6050_get_motion(device, &accel, &rotation));
+    ESP_ERROR_CHECK(mpu6050_get_temperature(&dev, &temp));
+    ESP_ERROR_CHECK(mpu6050_get_motion(&dev, &accel, &rotation));
 
     // ESP_LOGI(TAG, "**********************************************************************");
     // ESP_LOGI(TAG, "Acceleration: x=%.4f   y=%.4f   z=%.4f", accel.x, accel.y, accel.z);
     // ESP_LOGI(TAG, "Rotation:     x=%.4f   y=%.4f   z=%.4f", rotation.x, rotation.y, rotation.z);
     // ESP_LOGI(TAG, "Temperature:  %.1f", temp);
+
+    Gyroscope_unit_data_t g;
+    g.x = rotation.x;
+    g.y = rotation.y;
+    g.z = rotation.z;
+
+    // Accelerometer_unit_data_t a;
+    // a.x = accel.x;
+    // a.y = accel.y;
+    // a.z = accel.z;
     /*
         mpu_data_t test_data;
 
@@ -117,8 +128,8 @@ static esp_err_t MPU6050_read(i2c_device_t *device, void *data)
         // msg->id = counter;
         // msg->len = strlen(msg->data) + 1;
 
-        // msg->len = accelerometer_data2json(msg->data, a);
-        msg->len = gyroscope_data2json(msg->data, a);
+        // msg->data.len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
+        msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
 
         // IMU_data_t imu;
         // imu.g = g;
@@ -127,11 +138,11 @@ static esp_err_t MPU6050_read(i2c_device_t *device, void *data)
         // msg->len = IMU_data2json(msg->data, a);
     }
 
-    if (xRingbufferSend(ws_message_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
+    if (xRingbufferSend(&ws_msg_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
     {
         ESP_LOGI(TAG, "Send failed");
         free_ws_msg(msg);
-        return ESP_ERR
+        return ESP_FAIL;
     }
     //--------------------
 
@@ -139,9 +150,9 @@ static esp_err_t MPU6050_read(i2c_device_t *device, void *data)
 }
 //----------------------------------------------------------------------
 // Создание backend - структуры с персонализированными функциями драйвера
-const i2c_device_backend_t _MPU6050_backend = {
-    MPU6050_init,
-    MPU6050_read};
+static const i2c_device_backend_t _MPU6050_backend = {
+    .init = MPU6050_init,
+    .read = MPU6050_read};
 //----------------------------------------------------------------------
 esp_err_t MPU6050_setup(i2c_device_t *device)
 {

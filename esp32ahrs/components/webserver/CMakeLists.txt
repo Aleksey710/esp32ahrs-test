@@ -9,6 +9,7 @@ idf_component_register(
 
 
     REQUIRES 
+        esp_ringbuf
         freertos
         esp_wifi 
         nvs_flash

@@ -24,8 +24,8 @@ void i2c_device_init(i2c_device_t *device)
 
     switch (addr)
     {
-    case DEVICE_ADDRESS::MPU6050_LOW:
-    case DEVICE_ADDRESS::MPU6050_HIGHT:
+    case I2C_DEV_ADDR_MPU6050_LOW:
+    case I2C_DEV_ADDR_MPU6050_HIGHT:
     {
         // s->ops = &MPU6050_ops;
         // s->ctx = calloc(1, sizeof(MPU6050_ctx_t));

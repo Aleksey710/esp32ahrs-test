@@ -14,8 +14,7 @@
 #define FMT_F "%.4f"
 
 //----------------------------------------------------------------------
-// // GPIO и параметры "внутреннего" I2C, куда подключены PCA9685, MCP23017, INA219, TFMini-S
-// #define I2C_INT_SDA (34) // GPIO для SDA
-// #define I2C_INT_SDL (34) // GPIO для SDL
+#define WS_RINGBUF_MAX_DATA_SIZE 200
+#define WS_MSG_POOL_SIZE 10
 //----------------------------------------------------------------------
 #endif // CONFIG_H

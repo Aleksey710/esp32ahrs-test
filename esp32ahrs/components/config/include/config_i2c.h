@@ -26,6 +26,10 @@
 // GPIO 45–46(input - only / boot strap)
 // пины камеры(Y2–Y9, XCLK, PCLK и т.д.)
 // USB D+/D- (43/44 если используется USB)
+//----------------------------------------------------------------------
+// // GPIO и параметры "внутреннего" I2C, куда подключены PCA9685, MCP23017, INA219, TFMini-S
+// #define I2C_INT_SDA (34) // GPIO для SDA
+// #define I2C_INT_SDL (34) // GPIO для SDL
 
 #define I2C_SDA_GPIO 4
 #define I2C_SCL_GPIO 5

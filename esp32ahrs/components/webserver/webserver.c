@@ -278,7 +278,7 @@ static void ws_sender_task(void *arg)
             //--------------------
             // ESP_LOGI(TAG, "Received: %s", msg->data);
 
-            send_ws_msg(msg->data->data, int msg->data->len);
+            send_ws_msg(msg->data.data, msg->data.len);
 
             //--------------------
             free_ws_msg(msg); // возвращаем в пул
