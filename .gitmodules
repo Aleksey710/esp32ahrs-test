@@ -4,3 +4,6 @@
 [submodule "esp32ahrs/components/esp-idf-lib/i2cdev"]
 	path = esp32ahrs/components/esp-idf-lib/i2cdev
 	url = https://github.com/esp-idf-lib/i2cdev.git
+[submodule "esp32ahrs/components/esp-idf-lib/mpu6050"]
+	path = esp32ahrs/components/esp-idf-lib/mpu6050
+	url = https://github.com/esp-idf-lib/mpu6050.git
