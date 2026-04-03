@@ -9,13 +9,11 @@
 //----------------------------------------------------------------------
 int IMU_data2json(char *json_str, size_t json_str_len, IMU_data_t *data)
 {
-#define BUF_STR_LEN 50
+	char g_json_str[50];
+	gyroscope_data2json(g_json_str, json_str_len, &(data->g));
 
-	char g_json_str[BUF_STR_LEN];
-	gyroscope_data2json(g_json_str, BUF_STR_LEN, &(data->g));
-
-	char a_json_str[BUF_STR_LEN];
-	accelerometer_data2json(a_json_str, BUF_STR_LEN, &(data->a));
+	char a_json_str[50];
+	accelerometer_data2json(a_json_str, json_str_len, &(data->a));
 
 	return snprintf(json_str, json_str_len,
 					"{\"g\":%s,\"a\":%s}",

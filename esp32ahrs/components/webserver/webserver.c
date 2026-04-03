@@ -271,6 +271,12 @@ static void ws_sender_task(void *arg)
 
     while (1)
     {
+        if (ws_msg_ringbuf == NULL)
+        {
+            ESP_LOGE(TAG, "ws_msg_ringbuf NULL!");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            continue;
+        }
         //--------------------------------------------------------------
         /*
         if (xQueueReceive(ws_queue, &data, portMAX_DELAY))
@@ -296,39 +302,28 @@ static void ws_sender_task(void *arg)
         }
         */
         //--------------------------------------------------------------
-        /*
+
         size_t size;
+        Ws_msg_t **msg_ptr = (Ws_msg_t **)xRingbufferReceive(
+            ws_msg_ringbuf,
+            &size,
+            portMAX_DELAY);
 
-        // xSemaphoreTake(ws_msg_mutex, portMAX_DELAY);
+        if (msg_ptr)
+        {
+            Ws_msg_t *msg = *msg_ptr;
+            ESP_LOGI(TAG, "Received: %s", msg->str);
+            //--------------------
+            send_ws_msg(msg->str, msg->len);
 
-                Ws_msg_t **msg_ptr = (Ws_msg_t **)xRingbufferReceive(
-                    ws_msg_ringbuf,
-                    &size,
-                    portMAX_DELAY);
-
-
-                // xSemaphoreGive(ws_msg_mutex);
-                if (msg_ptr)
-                {
-                    Ws_msg_t *msg = *msg_ptr;
-                    //--------------------
-                    ESP_LOGI(TAG, "Received: %s", msg->data);
-
-                    send_ws_msg(msg->data.data, msg->data.len);
-
-                    //--------------------
-                    // xSemaphoreTake(ws_msg_mutex, portMAX_DELAY);
-
-                    free_ws_msg(msg); // возвращаем в пул
-                    vRingbufferReturnItem(ws_msg_ringbuf, msg_ptr);
-
-                    // xSemaphoreGive(ws_msg_mutex);
-                }
-        */
+            //--------------------
+            free_ws_msg(msg);                               // ✅ возвращаем в pool
+            vRingbufferReturnItem(ws_msg_ringbuf, msg_ptr); // ✅ освобождаем буфер
+        }
 
         //--------------------------------------------------------------
         // ограничение частоты посылки
-        vTaskDelay(pdMS_TO_TICKS(100)); // 20 - 50 Hz, 100
+        vTaskDelay(pdMS_TO_TICKS(20)); // 20 - 50 Hz, 100
 
         // yeld - освобождение потока
         vTaskDelay(pdMS_TO_TICKS(1));

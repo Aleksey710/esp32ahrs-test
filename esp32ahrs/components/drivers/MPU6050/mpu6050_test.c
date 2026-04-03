@@ -54,6 +54,14 @@ void mpu6050_test(void *pvParameters)
     //-------------
     while (1)
     {
+        // if (!ws_msg_ringbuf)
+        if (ws_msg_ringbuf == NULL)
+        {
+            ESP_LOGE(TAG, "ws_msg_ringbuf NULL!");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            continue;
+        }
+        //-------------
         float temp;
         mpu6050_acceleration_t accel = {0};
         mpu6050_rotation_t rotation = {0};
@@ -73,23 +81,22 @@ void mpu6050_test(void *pvParameters)
         g.y = rotation.y;
         g.z = rotation.z;
 
-        json_str_len = gyroscope_data2json(json_str, json_str_len, &g);
-        ESP_LOGI(TAG, "Gyroscope: %s", json_str);
+        // json_str_len = gyroscope_data2json(json_str, json_str_len, &g);
+        // ESP_LOGI(TAG, "Gyroscope: %s", json_str);
 
         Accelerometer_unit_data_t a;
         a.x = accel.x;
         a.y = accel.y;
         a.z = accel.z;
 
-        json_str_len = accelerometer_data2json(json_str, json_str_len, &a);
-        ESP_LOGI(TAG, "Accelerometer: %s", json_str);
+        // json_str_len = accelerometer_data2json(json_str, json_str_len, &a);
+        // ESP_LOGI(TAG, "Accelerometer: %s", json_str);
 
         IMU_data_t imu;
         imu.g = g;
         imu.a = a;
 
         json_str_len = IMU_data2json(json_str, json_str_len, &imu);
-
         ESP_LOGI(TAG, "IMU: %s", json_str);
 
         //--------------------
@@ -102,17 +109,26 @@ void mpu6050_test(void *pvParameters)
 
         if (msg)
         {
-            // msg->data.len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
-            msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
-            // msg->data.len = IMU_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &imu);
+            // msg->len = accelerometer_data2json(msg->str,WS_RINGBUFF_MAX_DATA_SIZE, a);
+            // msg->len = gyroscope_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &g);
+            msg->len = IMU_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &imu);
+
+            if (xRingbufferSend(ws_msg_ringbuf,
+                                &msg,
+                                sizeof(msg),       // ✅ передаём адрес указателя
+                                pdMS_TO_TICKS(100) // ✅ размер указателя
+                                ) != pdTRUE)
+            {
+                ESP_LOGE(TAG, "Send failed");
+                free_ws_msg(msg);
+
+                vTaskDelay(pdMS_TO_TICKS(1));
+                continue;
+            }
         }
 
-        if (xRingbufferSend(&ws_msg_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
-        {
-            ESP_LOGI(TAG, "Send failed");
-            free_ws_msg(msg);
-            return;
-        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
         //--------------------
         vTaskDelay(pdMS_TO_TICKS(1));
     }
@@ -125,4 +141,5 @@ void mpu6050_test_start(const int cpuid)
     // xTaskCreate(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL);
     // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL, cpuid);
     xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 8192, NULL, 5, NULL, cpuid);
+    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 16284, NULL, 5, NULL, cpuid);
 }

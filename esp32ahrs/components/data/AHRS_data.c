@@ -9,13 +9,11 @@
 //----------------------------------------------------------------------
 int AHRS_data2json(char *json_str, size_t json_str_len, AHRS_data_t *data)
 {
-#define BUF_STR_LEN 50
+	char imu_json_str[100];
+	IMU_data2json(imu_json_str, json_str_len, &(data->imu));
 
-	char imu_json_str[BUF_STR_LEN];
-	IMU_data2json(imu_json_str, BUF_STR_LEN, &(data->imu));
-
-	char m_json_str[BUF_STR_LEN];
-	magnetometer_data2json(m_json_str, BUF_STR_LEN, &(data->m));
+	char m_json_str[50];
+	magnetometer_data2json(m_json_str, json_str_len, &(data->m));
 
 	return snprintf(json_str, json_str_len,
 					"{\"imu\":%s,\"m\":%s}",

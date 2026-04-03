@@ -90,23 +90,22 @@ static esp_err_t MPU6050_read(i2c_device_t *i2c_dev, void *data)
     g.y = rotation.y;
     g.z = rotation.z;
 
-    gyroscope_data2json(json_str, json_str_len, &g);
-    ESP_LOGI(TAG, "Gyroscope: %s", json_str);
+    // gyroscope_data2json(json_str, json_str_len, &g);
+    // ESP_LOGI(TAG, "Gyroscope: %s", json_str);
 
     Accelerometer_unit_data_t a;
     a.x = accel.x;
     a.y = accel.y;
     a.z = accel.z;
 
-    accelerometer_data2json(json_str, json_str_len, &a);
-    ESP_LOGI(TAG, "Accelerometer: %s", json_str);
+    // accelerometer_data2json(json_str, json_str_len, &a);
+    // ESP_LOGI(TAG, "Accelerometer: %s", json_str);
 
     IMU_data_t imu;
     imu.g = g;
     imu.a = a;
 
     IMU_data2json(json_str, json_str_len, &imu);
-
     ESP_LOGI(TAG, "IMU: %s", json_str);
 
     //--------------------
@@ -116,29 +115,24 @@ static esp_err_t MPU6050_read(i2c_device_t *i2c_dev, void *data)
         xQueueSend(ws_queue, &test_data, portMAX_DELAY);
     */
     //--------------------
-    /*
+
     Ws_msg_t *msg = alloc_ws_msg();
 
     if (msg)
     {
         ESP_LOGI(TAG, "ws_msg allocated");
         // msg->data.len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
-        msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
-
-        // IMU_data_t imu;
-        // imu.g = g;
-        // imu.a = a;
-
-        // msg->len = IMU_data2json(msg->data, a);
+        // msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
+        msg->len = IMU_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &imu);
     }
 
-    if (xRingbufferSend(&ws_msg_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
+    if (xRingbufferSend(ws_msg_ringbuf, msg, sizeof(*msg), pdMS_TO_TICKS(100)) != pdTRUE)
     {
-        ESP_LOGI(TAG, "Send failed");
+        ESP_LOGE(TAG, "Send failed");
         free_ws_msg(msg);
         return ESP_FAIL;
     }
-    */
+
     //--------------------
 
     return ESP_OK;

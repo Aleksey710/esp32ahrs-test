@@ -154,7 +154,7 @@ void i2c_init(const int cpuid)
 
     xTaskCreatePinnedToCore(i2c_device_task,
                             "i2c_device_task",
-                            4096,
+                            /*4096*/ 8192,
                             NULL,
                             5,
                             NULL,
