@@ -18,6 +18,7 @@
 #include "config.h"
 #include "fs.h"
 #include "IMU_data.h"
+#include "ws_msg.h"
 #include "ws_msg_ringbuf.h"
 
 //----------------------------------------------------------------------
@@ -266,61 +267,12 @@ void send_ws_msg(char *json_str, int json_str_len)
 //----------------------------------------------------------------------
 static void ws_sender_task(void *arg)
 {
-    while (1)
-    {
-        size_t size;
-        Ws_msg_t **msg_ptr = (Ws_msg_t **)xRingbufferReceive(
-            ws_msg_ringbuf, &size, portMAX_DELAY);
-
-        if (msg_ptr)
-        {
-            Ws_msg_t *msg = *msg_ptr;
-            //--------------------
-            // ESP_LOGI(TAG, "Received: %s", msg->data);
-
-            send_ws_msg(msg->data.data, msg->data.len);
-
-            //--------------------
-            free_ws_msg(msg); // возвращаем в пул
-            vRingbufferReturnItem(ws_msg_ringbuf, msg_ptr);
-        }
-
-        // ограничение частоты посылки
-        // vTaskDelay(pdMS_TO_TICKS(20)); // 20 - 50 Hz
-
-        // yeld - освобождение потока
-        vTaskDelay(pdMS_TO_TICKS(1));
-    }
-
-    /*
-
-        // mpu_data_t test_data;
-
-    // test_data.ax = 1.0f;
-    // test_data.ay = 2.0f;
-    // test_data.az = 3.0f;
-
-    // test_data.gx = 0.1f;
-    // test_data.gy = 0.2f;
-    // test_data.gz = 0.3f;
-
-    // test_data.x = 10.1f;
-    // test_data.y = 20.2f;
-    // test_data.z = 30.3f;
-
-    // test_data.roll = 10.1f;
-    // test_data.pitch = 20.2f;
-    // test_data.yaw = 30.3f;
-
-    // // test_data.timestamp = 0;
-
-    // xQueueSend(ws_queue, &test_data, portMAX_DELAY);
-    // //---------
     // mpu_data_t data;
 
     while (1)
     {
-        //--------------------
+        //--------------------------------------------------------------
+        /*
         if (xQueueReceive(ws_queue, &data, portMAX_DELAY))
         {
 
@@ -342,13 +294,46 @@ static void ws_sender_task(void *arg)
 
             vTaskDelay(pdMS_TO_TICKS(1));
         }
+        */
+        //--------------------------------------------------------------
+        /*
+        size_t size;
+
+        // xSemaphoreTake(ws_msg_mutex, portMAX_DELAY);
+
+                Ws_msg_t **msg_ptr = (Ws_msg_t **)xRingbufferReceive(
+                    ws_msg_ringbuf,
+                    &size,
+                    portMAX_DELAY);
+
+
+                // xSemaphoreGive(ws_msg_mutex);
+                if (msg_ptr)
+                {
+                    Ws_msg_t *msg = *msg_ptr;
+                    //--------------------
+                    ESP_LOGI(TAG, "Received: %s", msg->data);
+
+                    send_ws_msg(msg->data.data, msg->data.len);
+
+                    //--------------------
+                    // xSemaphoreTake(ws_msg_mutex, portMAX_DELAY);
+
+                    free_ws_msg(msg); // возвращаем в пул
+                    vRingbufferReturnItem(ws_msg_ringbuf, msg_ptr);
+
+                    // xSemaphoreGive(ws_msg_mutex);
+                }
+        */
+
+        //--------------------------------------------------------------
         // ограничение частоты посылки
-        vTaskDelay(pdMS_TO_TICKS(20)); // 20 - 50 Hz
+        vTaskDelay(pdMS_TO_TICKS(100)); // 20 - 50 Hz, 100
 
         // yeld - освобождение потока
         vTaskDelay(pdMS_TO_TICKS(1));
+        //--------------------------------------------------------------
     }
-        */
 }
 //----------------------------------------------------------------------
 static void ws_ping_task(void *arg)
@@ -379,7 +364,7 @@ static void ws_ping_task(void *arg)
     }
 }
 //----------------------------------------------------------------------
-void start_webserver(QueueHandle_t queue, const int cpuid)
+void start_webserver(const int cpuid)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
@@ -393,8 +378,6 @@ void start_webserver(QueueHandle_t queue, const int cpuid)
     }
 
     //------------------------------------------------------------------
-    ws_queue = queue;
-
     ws_clients_mutex = xSemaphoreCreateMutex();
     if (!ws_clients_mutex)
     {

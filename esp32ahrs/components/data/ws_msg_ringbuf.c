@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 #define TAG "WS_RINGBUF"
 //----------------------------------------------------------------------
-static RingbufHandle_t ws_msg_ringbuf;
+// static RingbufHandle_t ws_msg_ringbuf;
 //----------------------------------------------------------------------
 
 static Ws_msg_t ws_msg_pool[WS_MSG_POOL_SIZE];
@@ -129,11 +129,11 @@ void ws_msg_ringbuf_setup(void)
 
     if (ws_msg_ringbuf == NULL)
     {
-        ESP_LOGI(TAG, "Failed to create ring buffer: ws_msg_ringbuf");
-        return;
+        ESP_LOGI(TAG, "Create ring buffer[ws_msg_ringbuf]: failed ");
     }
-
-    // xTaskCreate(producer_task, "producer", 4096, NULL, 5, NULL);
-    // xTaskCreate(consumer_task, "consumer", 4096, NULL, 5, NULL);
+    else
+    {
+        ESP_LOGI(TAG, "Create ring buffer[ws_msg_ringbuf]: created");
+    }
 }
 //----------------------------------------------------------------------

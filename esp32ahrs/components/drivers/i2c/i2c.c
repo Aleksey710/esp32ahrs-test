@@ -67,13 +67,13 @@ static void i2c_register_device(uint8_t addr)
         .scl_speed_hz = I2C_FREQ,
     };
 
+    i2c_device->dev_cfg = dev_cfg;
+
     if (i2c_master_bus_add_device(bus, &dev_cfg, &i2c_device->dev) != ESP_OK)
     {
         free(i2c_device);
         return;
     }
-
-    i2c_device->dev_cfg = dev_cfg;
 
     i2c_device_init(i2c_device);
 
@@ -85,30 +85,46 @@ static void i2c_register_device(uint8_t addr)
 void i2c_scan_and_register(void)
 {
     ESP_LOGI(TAG, "Scanning I2C bus...");
-
-    for (uint8_t addr = 1; addr < 127; addr++)
-    {
-        if (i2c_probe(addr))
+    /*
+        for (uint8_t addr = 1; addr < 127; addr++)
         {
-            ESP_LOGI(TAG, "Found device at 0x%02X", addr);
-            i2c_register_device(addr);
+            if (i2c_probe(addr))
+            {
+                ESP_LOGI(TAG, "Found device at 0x%02X", addr);
+                i2c_register_device(addr);
+            }
         }
+        */
+    //----------------------------------------------------------------------
+    /*
+    for (uint8_t addr = 1; addr < 127; addr++)
+    // while (1)
+    {
+        esp_err_t res = i2c_dev_probe(&dev.i2c_dev, I2C_DEV_WRITE);
+        if (res == ESP_OK)
+        {
+            ESP_LOGI(TAG, "Found MPU60x0 device");
+            break;
+        }
+        ESP_LOGE(TAG, "MPU60x0 not found");
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
+    */
 }
 //----------------------------------------------------------------------
 static void i2c_device_task(void *arg)
 {
-    Ws_msg_data_t data;
-
     while (1)
     {
         for (int i = 0; i < device_count; i++)
         {
             i2c_device_t *device = devices[i];
 
+            void *data = NULL;
+
             if (device->backend->read(device, &data) == ESP_OK)
             {
-                ESP_LOGI(TAG, "[%s] %s", device->type_name, data.data);
+                // ESP_LOGI(TAG, "[%s]-[%d]-[%s]", device->type_name, device->dev_cfg., device->data.data);
 
                 // 👉 сюда можно отправку в очередь добавить
             }
@@ -121,6 +137,7 @@ static void i2c_device_task(void *arg)
 void i2c_init(const int cpuid)
 {
     ESP_LOGI(TAG, "Init I2C");
+    //----------------------------------------------------------------------
 
     i2c_master_bus_config_t bus_cfg = {
         .i2c_port = I2C_PORT,
@@ -132,6 +149,7 @@ void i2c_init(const int cpuid)
 
     ESP_ERROR_CHECK(i2c_new_master_bus(&bus_cfg, &bus));
 
+    //----------------------------------------------------------------------
     i2c_scan_and_register();
 
     xTaskCreatePinnedToCore(i2c_device_task,

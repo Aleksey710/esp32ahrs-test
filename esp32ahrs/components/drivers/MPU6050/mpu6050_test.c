@@ -13,15 +13,16 @@
 
 #include "accelerometer_data.h"
 #include "gyroscope_data.h"
+#include "IMU_data.h"
 
 #include "ws_msg_ringbuf.h"
-// #include "webserver.h"
+#include "ws_msg.h"
 //----------------------------------------------------------------------
 
 static const char *TAG = "mpu6050_test";
 
 //----------------------------------------------------------------------
-static QueueHandle_t ws_queue;
+
 //----------------------------------------------------------------------
 void mpu6050_test(void *pvParameters)
 {
@@ -51,8 +52,6 @@ void mpu6050_test(void *pvParameters)
     ESP_LOGI(TAG, "Gyro range:  %d", dev.ranges.gyro);
 
     //-------------
-    // mpu_data_t test_data;
-    //-------------
     while (1)
     {
         float temp;
@@ -61,64 +60,51 @@ void mpu6050_test(void *pvParameters)
 
         ESP_ERROR_CHECK(mpu6050_get_temperature(&dev, &temp));
         ESP_ERROR_CHECK(mpu6050_get_motion(&dev, &accel, &rotation));
+        // ESP_LOGI(TAG, "**********************************************************************");
+        // ESP_LOGI(TAG, "Acceleration: x=%.4f   y=%.4f   z=%.4f", accel.x, accel.y, accel.z);
+        // ESP_LOGI(TAG, "Rotation:     x=%.4f   y=%.4f   z=%.4f", rotation.x, rotation.y, rotation.z);
+        // ESP_LOGI(TAG, "Temperature:  %.1f", temp);
+
+        size_t json_str_len = 256;
+        char json_str[json_str_len];
 
         Gyroscope_unit_data_t g;
         g.x = rotation.x;
         g.y = rotation.y;
         g.z = rotation.z;
 
-        // Accelerometer_unit_data_t a;
-        // a.x = accel.x;
-        // a.y = accel.y;
-        // a.z = accel.z;
+        json_str_len = gyroscope_data2json(json_str, json_str_len, &g);
+        ESP_LOGI(TAG, "Gyroscope: %s", json_str);
 
-        // ESP_LOGI(TAG, "**********************************************************************");
-        // ESP_LOGI(TAG, "Acceleration: x=%.4f   y=%.4f   z=%.4f", accel.x, accel.y, accel.z);
-        // ESP_LOGI(TAG, "Rotation:     x=%.4f   y=%.4f   z=%.4f", rotation.x, rotation.y, rotation.z);
-        // ESP_LOGI(TAG, "Temperature:  %.1f", temp);
-        /*
-                test_data.ax = accel.x;
-                test_data.ay = accel.y;
-                test_data.az = accel.z;
+        Accelerometer_unit_data_t a;
+        a.x = accel.x;
+        a.y = accel.y;
+        a.z = accel.z;
 
-                test_data.gx = rotation.x;
-                test_data.gy = rotation.y;
-                test_data.gz = rotation.z;
+        json_str_len = accelerometer_data2json(json_str, json_str_len, &a);
+        ESP_LOGI(TAG, "Accelerometer: %s", json_str);
 
-                //--------------
-                test_data.x = accel.x;
-                test_data.y = accel.y;
-                test_data.z = accel.z;
+        IMU_data_t imu;
+        imu.g = g;
+        imu.a = a;
 
-                // test_data.x = rotation.x;
-                // test_data.y = rotation.y;
-                // test_data.z = rotation.z;
+        json_str_len = IMU_data2json(json_str, json_str_len, &imu);
 
-                test_data.roll = 10.1f;
-                test_data.pitch = 20.2f;
-                test_data.yaw = 30.3f;
-                //--------------
-                // test_data.timestamp = 0;
+        ESP_LOGI(TAG, "IMU: %s", json_str);
 
-                xQueueSend(ws_queue, &test_data, portMAX_DELAY);
-        */
+        //--------------------
+        // Ws_msg_t ws_msg = {.data = json_str,
+        //                    .len = json_str_len};
+        // xQueueSend(ws_msg_queue, &ws_msg, portMAX_DELAY);
+        //--------------------
         //--------------------
         Ws_msg_t *msg = alloc_ws_msg();
 
         if (msg)
         {
-            // snprintf(msg->data, WS_RINGBUFF_MAX_DATA_SIZE, "Msg #%d", counter);
-            // msg->id = counter;
-            // msg->len = strlen(msg->data) + 1;
-
             // msg->data.len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
             msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
-
-            // IMU_data_t imu;
-            // imu.g = g;
-            // imu.a = a;
-
-            // msg->len = IMU_data2json(msg->data, a);
+            // msg->data.len = IMU_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &imu);
         }
 
         if (xRingbufferSend(&ws_msg_ringbuf, &msg, sizeof(msg), pdMS_TO_TICKS(100)) != pdTRUE)
@@ -132,11 +118,9 @@ void mpu6050_test(void *pvParameters)
     }
 }
 //----------------------------------------------------------------------
-void mpu6050_test_start(QueueHandle_t queue, const int cpuid)
+void mpu6050_test_start(const int cpuid)
 {
     ESP_ERROR_CHECK(i2cdev_init());
-
-    ws_queue = queue;
 
     // xTaskCreate(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL);
     // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL, cpuid);
