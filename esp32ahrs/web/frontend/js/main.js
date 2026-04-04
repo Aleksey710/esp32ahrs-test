@@ -13,6 +13,7 @@ console.trace('ENTRY STACK');
 */
 
 function updateData(data) {
+	console.log(data);
 	tv.dataUpdate(data);
 	cv.dataUpdate(data);
 	//dv.dataUpdate(data);

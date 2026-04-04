@@ -1,6 +1,10 @@
 import Chart from 'chart.js/auto';
 
-let chart;
+let chart_g;
+let chart_a;
+let chart_m;
+
+
 let timeIndex = 0;
 
 const MAX_POINTS = 300;
@@ -14,21 +18,8 @@ const axesState = {
 
 let initialized = false;
 
-export function initChart() {
-    
-    if (initialized)
-    {
-		//console.log('Chart setup...2');
-		return;
-	} else
-	{
-		initialized = true;
-		//console.log('Chart setup...1');
-	}
-
-    const ctx = document.getElementById('chart').getContext('2d');
-
-    chart = new Chart(ctx, {
+function setupChart(ctx) {
+    let chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
@@ -85,38 +76,75 @@ export function initChart() {
     });
 
     createControls();
+    
+    return chart;
+}
+
+export function initChart() {
+    
+    if (initialized)
+    {
+		//console.log('Chart setup...2');
+		return;
+	} else
+	{
+		initialized = true;
+		//console.log('Chart setup...1');
+	}
+
+    const ctx_g = document.getElementById('chart_g').getContext('2d');
+    const ctx_a = document.getElementById('chart_a').getContext('2d');
+    const ctx_m = document.getElementById('chart_m').getContext('2d');
+
+	chart_g = setupChart(ctx_g);
+	chart_a = setupChart(ctx_a);
+	chart_m = setupChart(ctx_m);
 }
 
 export function dataUpdate(data) {
-    if (!chart) return;
+    if (!chart_g) return;
+    if (!chart_a) return;
+    if (!chart_m) return;
 
     // ось времени
-    chart.data.labels.push(timeIndex++);
 
     // данные
-    chart.data.datasets[0].data.push(data.x);
-    chart.data.datasets[1].data.push(data.y);
-    chart.data.datasets[2].data.push(data.z);
+    chart_g.data.labels.push(timeIndex++);
+    chart_g.data.datasets[0].data.push(data.imu.g.x);
+    chart_g.data.datasets[1].data.push(data.imu.g.y);
+    chart_g.data.datasets[2].data.push(data.imu.g.z);
+    
+    chart_a.data.labels.push(timeIndex++);
+    chart_a.data.datasets[0].data.push(data.imu.a.x);
+    chart_a.data.datasets[1].data.push(data.imu.a.y);
+    chart_a.data.datasets[2].data.push(data.imu.a.z);
+    
+    chart_m.data.labels.push(timeIndex++);
+	chart_m.data.datasets[0].data.push(data.m.x);
+    chart_m.data.datasets[1].data.push(data.m.y);
+    chart_m.data.datasets[2].data.push(data.m.z);
 
     // ограничение размера (как осциллограф)
-    if (chart.data.labels.length > MAX_POINTS) {
-        chart.data.labels.shift();
+    if (chart_g.data.labels.length > MAX_POINTS) {
+        chart_g.data.labels.shift();
 
-        chart.data.datasets.forEach(ds => {
+        chart_g.data.datasets.forEach(ds => {
             ds.data.shift();
         });
     }
 
     // авто-масштабирование
-    autoScale();
-    //updateMinMax(data);
+    autoScale(chart_g);
+    autoScale(chart_a);
+    autoScale(chart_m);
 
-    chart.update('none');
-    //requestAnimationFrame(() => chart.update('none'));
+    chart_g.update('none');
+    chart_a.update('none');
+    chart_m.update('none');
 }
 
 // 📈 авто масштаб
-function autoScale() {
+function autoScale(chart) {
     let allValues = [];
 
     chart.data.datasets.forEach((ds, i) => {
@@ -153,8 +181,10 @@ function updateMinMax(data) {
     chart.options.scales.y.max = maxY + padding;
 }
 */
+
+
 // 🎛 UI для включения/выключения осей
-function createControls() {
+function createControlsAxes() {
     const container = document.createElement('div');
     container.style.margin = '10px';
 
@@ -178,11 +208,20 @@ function createControls() {
         container.appendChild(label);
     });
 
-	const chartEl = document.getElementById('chart');
-    //document.body.
-    chartEl.parentNode.insertBefore(container, document.getElementById('chart'));
+	return container;
 }
 
+function createControls()
+{
+	const chartEl_g = document.getElementById('chart_g');
+    chartEl_g.parentNode.insertBefore(createControlsAxes(), document.getElementById('chart_g'));
+	
+	const chartEl_a = document.getElementById('chart_a');
+    chartEl_a.parentNode.insertBefore(createControlsAxes(), document.getElementById('chart_a'));
+	
+	const chartEl_m = document.getElementById('chart_m');
+    chartEl_m.parentNode.insertBefore(createControlsAxes(), document.getElementById('chart_m'));
+}
 
 
 

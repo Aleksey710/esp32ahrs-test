@@ -16,8 +16,10 @@ function noise(scale = 0.05) {
 
 function generateData(t) {
     switch (MODE) {
+/*
         case 'random':
-            return {
+            return 
+            {
                 x: Math.random() * 2 - 1,
                 y: Math.random() * 2 - 1,
                 z: Math.random() * 2 - 1,
@@ -37,21 +39,30 @@ function generateData(t) {
                 yaw: 0,
                 timestamp: Date.now()
             };
-
-        case 'sin':
-        default:
-            return {
-                x: Math.sin(t) + noise(),
-                y: Math.cos(t) + noise(),
-                z: Math.sin(t * 0.5) + noise(),
-
-                roll: Math.sin(t) * 30 + noise(1),
-                pitch: Math.cos(t) * 30 + noise(1),
-                yaw: t * 10,
-
-                timestamp: Date.now()
-            };
-    }
+*/
+	case 'sin':
+	default:
+		return {
+			timestamp: Date.now(),
+			imu:{
+				g:{
+						x: Math.sin(t) + noise(),
+						y: Math.cos(t) + noise(),
+						z: Math.sin(t * 0.5) + noise()
+					},
+				a:{
+						x: Math.sin(t) + noise(),
+						y: Math.cos(t) + noise(),
+						z: Math.sin(t * 0.5) + noise()
+					}
+			},
+			m:{
+				x: Math.sin(t) + noise(),
+				y: Math.cos(t) + noise(),
+				z: Math.sin(t * 0.5) + noise()
+			}
+		};
+	};
 }
 
 wss.on('connection', (ws) => {

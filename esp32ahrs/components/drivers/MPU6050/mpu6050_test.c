@@ -14,6 +14,7 @@
 #include "accelerometer_data.h"
 #include "gyroscope_data.h"
 #include "IMU_data.h"
+#include "AHRS_data.h"
 
 #include "ws_msg_ringbuf.h"
 #include "ws_msg.h"
@@ -96,8 +97,15 @@ void mpu6050_test(void *pvParameters)
         imu.g = g;
         imu.a = a;
 
-        json_str_len = IMU_data2json(json_str, json_str_len, &imu);
-        ESP_LOGI(TAG, "IMU: %s", json_str);
+        // IMU_data2json(json_str, json_str_len, &imu);
+        // ESP_LOGI(TAG, "IMU: %s", json_str);
+
+        AHRS_data_t ahrs;
+        ahrs.imu = imu;
+        // ahrs.m = {0};
+
+        AHRS_data2json(json_str, json_str_len, &ahrs);
+        ESP_LOGI(TAG, "AHRS: %s", json_str);
 
         //--------------------
         // Ws_msg_t ws_msg = {.data = json_str,
@@ -109,9 +117,10 @@ void mpu6050_test(void *pvParameters)
 
         if (msg)
         {
-            // msg->len = accelerometer_data2json(msg->str,WS_RINGBUFF_MAX_DATA_SIZE, a);
-            // msg->len = gyroscope_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &g);
-            msg->len = IMU_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &imu);
+            // msg->len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
+            // msg->len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
+            // msg->len = IMU_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &imu);
+            msg->len = AHRS_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &ahrs);
 
             if (xRingbufferSend(ws_msg_ringbuf,
                                 &msg,

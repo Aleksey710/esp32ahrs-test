@@ -26,6 +26,7 @@ export function initWebSocket(onData) {
                 // { x: 1, y: 2, z: 3, roll: 0, pitch: 0, yaw: 0 }
 
                 if (onData) {
+					//console.log(data);
                     onData(data);
                 }
             } catch (e) {

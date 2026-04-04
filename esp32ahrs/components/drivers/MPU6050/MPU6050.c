@@ -19,6 +19,7 @@
 #include "accelerometer_data.h"
 #include "gyroscope_data.h"
 #include "IMU_data.h"
+#include "AHRS_data.h"
 
 #include "ws_msg_ringbuf.h"
 
@@ -105,8 +106,15 @@ static esp_err_t MPU6050_read(i2c_device_t *i2c_dev, void *data)
     imu.g = g;
     imu.a = a;
 
-    IMU_data2json(json_str, json_str_len, &imu);
-    ESP_LOGI(TAG, "IMU: %s", json_str);
+    // IMU_data2json(json_str, json_str_len, &imu);
+    // ESP_LOGI(TAG, "IMU: %s", json_str);
+
+    AHRS_data_t ahrs;
+    ahrs.imu = imu;
+    // ahrs.m = {0};
+
+    AHRS_data2json(json_str, json_str_len, &ahrs);
+    ESP_LOGI(TAG, "AHRS: %s", json_str);
 
     //--------------------
     /*
@@ -121,9 +129,10 @@ static esp_err_t MPU6050_read(i2c_device_t *i2c_dev, void *data)
     if (msg)
     {
         ESP_LOGI(TAG, "ws_msg allocated");
-        // msg->data.len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
-        // msg->data.len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
-        msg->len = IMU_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &imu);
+        // msg->len = accelerometer_data2json(msg->data.data,WS_RINGBUFF_MAX_DATA_SIZE, a);
+        // msg->len = gyroscope_data2json(msg->data.data, WS_RINGBUF_MAX_DATA_SIZE, &g);
+        // msg->len = IMU_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &imu);
+        msg->len = AHRS_data2json(msg->str, WS_RINGBUF_MAX_DATA_SIZE, &ahrs);
     }
 
     if (xRingbufferSend(ws_msg_ringbuf, msg, sizeof(*msg), pdMS_TO_TICKS(100)) != pdTRUE)
@@ -134,7 +143,6 @@ static esp_err_t MPU6050_read(i2c_device_t *i2c_dev, void *data)
     }
 
     //--------------------
-
     return ESP_OK;
 }
 //----------------------------------------------------------------------
