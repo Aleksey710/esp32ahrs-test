@@ -74,38 +74,37 @@ void mpu6050_test(void *pvParameters)
         // ESP_LOGI(TAG, "Rotation:     x=%.4f   y=%.4f   z=%.4f", rotation.x, rotation.y, rotation.z);
         // ESP_LOGI(TAG, "Temperature:  %.1f", temp);
 
-        size_t json_str_len = 256;
-        char json_str[json_str_len];
-
         Gyroscope_unit_data_t g;
         g.x = rotation.x;
         g.y = rotation.y;
         g.z = rotation.z;
-
-        // json_str_len = gyroscope_data2json(json_str, json_str_len, &g);
-        // ESP_LOGI(TAG, "Gyroscope: %s", json_str);
 
         Accelerometer_unit_data_t a;
         a.x = accel.x;
         a.y = accel.y;
         a.z = accel.z;
 
-        // json_str_len = accelerometer_data2json(json_str, json_str_len, &a);
-        // ESP_LOGI(TAG, "Accelerometer: %s", json_str);
-
         IMU_data_t imu;
         imu.g = g;
         imu.a = a;
 
+        AHRS_data_t ahrs;
+        ahrs.imu = imu;
+
+        // size_t json_str_len = 256;
+        // char json_str[json_str_len];
+
+        // json_str_len = gyroscope_data2json(json_str, json_str_len, &g);
+        // ESP_LOGI(TAG, "Gyroscope: %s", json_str);
+
+        // json_str_len = accelerometer_data2json(json_str, json_str_len, &a);
+        // ESP_LOGI(TAG, "Accelerometer: %s", json_str);
+
         // IMU_data2json(json_str, json_str_len, &imu);
         // ESP_LOGI(TAG, "IMU: %s", json_str);
 
-        AHRS_data_t ahrs;
-        ahrs.imu = imu;
-        // ahrs.m = {0};
-
-        AHRS_data2json(json_str, json_str_len, &ahrs);
-        ESP_LOGI(TAG, "AHRS: %s", json_str);
+        // AHRS_data2json(json_str, json_str_len, &ahrs);
+        // ESP_LOGI(TAG, "AHRS: %s", json_str);
 
         //--------------------
         // Ws_msg_t ws_msg = {.data = json_str,
@@ -136,7 +135,7 @@ void mpu6050_test(void *pvParameters)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(20));
 
         //--------------------
         vTaskDelay(pdMS_TO_TICKS(1));
@@ -149,6 +148,7 @@ void mpu6050_test_start(const int cpuid)
 
     // xTaskCreate(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL);
     // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL, cpuid);
-    xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 8192, NULL, 5, NULL, cpuid);
+    xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 4096, NULL, 5, NULL, cpuid);
+    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 8192, NULL, 5, NULL, cpuid);
     // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 16284, NULL, 5, NULL, cpuid);
 }

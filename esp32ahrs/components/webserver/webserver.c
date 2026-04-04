@@ -267,8 +267,6 @@ void send_ws_msg(char *json_str, int json_str_len)
 //----------------------------------------------------------------------
 static void ws_sender_task(void *arg)
 {
-    // mpu_data_t data;
-
     while (1)
     {
         if (ws_msg_ringbuf == NULL)
@@ -279,26 +277,10 @@ static void ws_sender_task(void *arg)
         }
         //--------------------------------------------------------------
         /*
-        if (xQueueReceive(ws_queue, &data, portMAX_DELAY))
+        Ws_msg_t msg;
+        if (xQueueReceive(ws_queue, &msg, portMAX_DELAY))
         {
-
-            char json_str[256];
-
-            int json_str_len = snprintf(json_str, sizeof(json_str),
-                                        "{"
-                                        "\"ax\":" FMT_F ",\"ay\":" FMT_F ",\"az\":" FMT_F ","
-                                        "\"gx\":" FMT_F ",\"gy\":" FMT_F ",\"gz\":" FMT_F ","
-                                        "\"x\":" FMT_F ",\"y\":" FMT_F ",\"z\":" FMT_F ","
-                                        "\"roll\":" FMT_F ",\"pitch\":" FMT_F ",\"yaw\":" FMT_F
-                                        "}",
-                                        (double)data.ax, (double)data.ay, (double)data.az,
-                                        (double)data.gx, (double)data.gy, (double)data.gz,
-                                        (double)data.x, (double)data.y, (double)data.z,
-                                        (double)data.roll, (double)data.pitch, (double)data.yaw);
-
-            send_ws_msg(json_str, json_str_len);
-
-            vTaskDelay(pdMS_TO_TICKS(1));
+            send_ws_msg(msg.str, msg.len);
         }
         */
         //--------------------------------------------------------------
@@ -313,6 +295,7 @@ static void ws_sender_task(void *arg)
         {
             Ws_msg_t *msg = *msg_ptr;
             ESP_LOGI(TAG, "Received: %s", msg->str);
+
             //--------------------
             send_ws_msg(msg->str, msg->len);
 

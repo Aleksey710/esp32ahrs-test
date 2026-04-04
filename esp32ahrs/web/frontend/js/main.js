@@ -13,7 +13,8 @@ console.trace('ENTRY STACK');
 */
 
 function updateData(data) {
-	console.log(data);
+	//console.log(data);
+	
 	tv.dataUpdate(data);
 	cv.dataUpdate(data);
 	//dv.dataUpdate(data);
@@ -38,8 +39,9 @@ renderLoop();
 
 function setup() {
 	//console.log('setup start...', location.hostname);
-	cv.initChart();
+	cv.initCharts();
 	//dv.init3DView();
+	
 	ws.initWebSocket(updateData);
 }
 
