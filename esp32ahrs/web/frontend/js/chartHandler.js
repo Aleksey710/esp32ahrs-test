@@ -1,8 +1,8 @@
 import Chart from 'chart.js/auto';
+import { initFFTChart, fftDataUpdate } from './fftChartHandler.js';
 
-let chart_g;
-let chart_a;
-let chart_m;
+let chart_g, chart_a, chart_m;
+let fft_g,   fft_a,   fft_m;
 
 let timeIndex = 0;
 
@@ -105,6 +105,12 @@ function createControlsAxes(chart) {
 	return container;
 }
 
+export function initFFTCharts() {
+    fft_g = initFFTChart('fft_g');
+    fft_a = initFFTChart('fft_a');
+    fft_m = initFFTChart('fft_m');
+}
+
 export function initChart(elementId) {
 	const element = document.getElementById(elementId);
 	
@@ -120,9 +126,11 @@ export function initCharts() {
 	chart_g = initChart('chart_g');
 	chart_a = initChart('chart_a');
 	chart_m = initChart('chart_m');
+	
+	initFFTCharts();
 }
 
-export function axesDataUpdate(data, chart) {
+function axesDataUpdate(data, chart) {
 	//console.log('axesDataUpdate',data, chart);
 	
     if (chart)
@@ -176,21 +184,25 @@ export function dataUpdate(data) {
 		if(data.imu.g)
 		{
 			axesDataUpdate(data.imu.g, chart_g);
+			fftDataUpdate('g', data.imu.g);
 		}
 		
 		if(data.imu.a)
 		{
 			axesDataUpdate(data.imu.a, chart_a);
+			fftDataUpdate('a', data.imu.a);
 		}
 	}
-
+/*
 	if(data.m)
 	{
 		if(data.m)
 		{
 			axesDataUpdate(data.m, chart_m);
+			fftDataUpdate('m', data.imu.m);
 		}
 	}
+	*/
 }
 
 

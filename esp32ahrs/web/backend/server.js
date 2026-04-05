@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-const PERIOD = 100; //  in milliseconds (1000 ms = 1 second)
+const PERIOD = 10; //  in milliseconds (1000 ms = 1 second)
 
 const PORT = 8080;
 const MODE = process.env.MODE || 'sin'; // sin | random | static
@@ -16,52 +16,71 @@ function noise(scale = 0.05) {
 
 function generateData(t) {
     switch (MODE) {
-/*
         case 'random':
-            return 
-            {
-                x: Math.random() * 2 - 1,
-                y: Math.random() * 2 - 1,
-                z: Math.random() * 2 - 1,
-                roll: Math.random() * 360,
-                pitch: Math.random() * 360,
-                yaw: Math.random() * 360,
-                timestamp: Date.now()
-            };
+			return {
+				timestamp: Date.now(),
+				imu:{
+					g:{
+						x: (Math.random() * 2 - 1),
+						y: Math.random() * 2 - 1,
+						z: Math.random() * 2 - 1
 
-        case 'static':
-            return {
-                x: 0,
-                y: 0,
-                z: 1,
-                roll: 0,
-                pitch: 0,
-                yaw: 0,
-                timestamp: Date.now()
-            };
-*/
-	case 'sin':
-	default:
-		return {
-			timestamp: Date.now(),
-			imu:{
-				g:{
-						x: Math.sin(t) + noise(),
-						y: Math.cos(t) + noise(),
-						z: Math.sin(t * 0.5) + noise()
 					},
-				a:{
-						x: Math.sin(t) + noise(),
-						y: Math.cos(t) + noise(),
-						z: Math.sin(t * 0.5) + noise()
+					a:{
+						x: (Math.random() * 2 - 1),
+						y: Math.random() * 2 - 1,
+						z: Math.random() * 2 - 1
 					}
-			},
-			m:{
-				x: Math.sin(t) + noise(),
-				y: Math.cos(t) + noise(),
-				z: Math.sin(t * 0.5) + noise()
-			}
-		};
+				},
+				m:{
+					x: (Math.random() * 2 - 1),
+					y: Math.random() * 2 - 1,
+					z: Math.random() * 2 - 1
+				}
+			};
+        case 'static':
+			return {
+				timestamp: Date.now(),
+				imu:{
+					g:{
+						x: 0,
+						y: 0,
+						z: 1
+					},
+					a:{
+						x: 0,
+						y: 0,
+						z: 1
+					}
+				},
+				m:{
+					x: 0,
+					y: 0,
+					z: 1
+				}
+			};
+		case 'sin':
+		default:
+			return {
+				timestamp: Date.now(),
+				imu:{
+					g:{
+						x: Math.sin(t * 0.5) + noise(),
+						y: Math.cos(t * 0.6) + noise(),
+						z: Math.sin(t * 0.7) + noise()
+					},
+					a:{
+						x: Math.sin(t * 0.5) + noise(),
+						y: Math.cos(t * 0.6) + noise(),
+						z: Math.sin(t * 0.7) + noise()
+					}
+				},
+				m:{
+					x: Math.sin(t * 0.5) + noise(),
+					y: Math.cos(t * 0.6) + noise(),
+					z: Math.sin(t * 0.7) + noise()
+				}
+			};
 	};
 }
 

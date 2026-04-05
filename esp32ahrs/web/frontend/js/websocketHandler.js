@@ -22,9 +22,6 @@ export function initWebSocket(onData) {
             try {
                 const data = JSON.parse(event.data);
 
-                // ожидаем что-то вроде:
-                // { x: 1, y: 2, z: 3, roll: 0, pitch: 0, yaw: 0 }
-
                 if (onData) {
 					//console.log(data);
                     onData(data);
@@ -46,16 +43,6 @@ export function initWebSocket(onData) {
     }
 
     connect();
-
-	/*
-    return {
-        send: (data) => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(data));
-            }
-        }
-    };
-    */
 }
 
 
