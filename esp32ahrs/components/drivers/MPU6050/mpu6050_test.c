@@ -142,13 +142,13 @@ void mpu6050_test(void *pvParameters)
     }
 }
 //----------------------------------------------------------------------
-void mpu6050_test_start(const int cpuid)
+void mpu6050_test_start(const int cpuId)
 {
     ESP_ERROR_CHECK(i2cdev_init());
 
     // xTaskCreate(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL);
-    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL, cpuid);
-    xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 4096, NULL, 5, NULL, cpuid);
-    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 8192, NULL, 5, NULL, cpuid);
-    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 16284, NULL, 5, NULL, cpuid);
+    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", configMINIMAL_STACK_SIZE * 6, NULL, 5, NULL, cpuId);
+    xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 4096, NULL, 5, NULL, cpuId);
+    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 8192, NULL, 5, NULL, cpuId);
+    // xTaskCreatePinnedToCore(mpu6050_test, "mpu6050_test", 16284, NULL, 5, NULL, cpuId);
 }

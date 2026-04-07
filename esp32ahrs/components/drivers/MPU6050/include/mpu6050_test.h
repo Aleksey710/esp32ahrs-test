@@ -6,6 +6,6 @@
 //----------------------------------------------------------------------
 
 void mpu6050_test(void *pvParameters);
-void mpu6050_test_start(const int cpuid);
+void mpu6050_test_start(const int cpuId);
 //----------------------------------------------------------------------
 #endif // MPU6050_TEST_H

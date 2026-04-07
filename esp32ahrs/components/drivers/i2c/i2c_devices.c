@@ -24,6 +24,9 @@ void i2c_device_init(i2c_device_t *device)
 
     switch (addr)
     {
+    case 0x70: // QMC5883L_I2C_ADDR_DEF
+    {
+    }
     case I2C_DEV_ADDR_MPU6050_LOW:
     case I2C_DEV_ADDR_MPU6050_HIGHT:
     {
@@ -33,7 +36,7 @@ void i2c_device_init(i2c_device_t *device)
             return;
     }
     break;
-    case 0x70:
+    case 0x71:
     {
     }
     break;

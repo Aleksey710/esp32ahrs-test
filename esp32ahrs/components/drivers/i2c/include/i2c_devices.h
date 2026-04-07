@@ -12,6 +12,8 @@ enum I2C_DEV_ADDR
     // ...
     I2C_DEV_ADDR_MPU6050_LOW = 0x68,
     I2C_DEV_ADDR_MPU6050_HIGHT = 0x69,
+
+    I2C_DEV_ADDR_QMC5883L = 0x0d,
     // ...
     I2C_DEV_ADDR_DEVICE_LAST = 0xf0
 };

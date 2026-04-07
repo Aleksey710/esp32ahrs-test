@@ -19,6 +19,8 @@ SUBMODULES=(
     "https://github.com/joltwallet/esp_littlefs.git|esp32ahrs/components/esp_littlefs"
     "https://github.com/esp-idf-lib/i2cdev.git|esp32ahrs/components/esp-idf-lib/i2cdev"
     "https://github.com/esp-idf-lib/mpu6050.git|esp32ahrs/components/esp-idf-lib/mpu6050"
+    "https://github.com/esp-idf-lib/qmc5883l.git|esp32ahrs/components/esp-idf-lib/qmc5883l"   
+    "https://github.com/esp-cpp/espp/tree/main/components/adxl345|esp32ahrs/components/esp-cpp/espp/adxl345"   
 )
 
 # 🧠 НЕ очищаем .gitmodules полностью!

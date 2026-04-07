@@ -1,10 +1,10 @@
 import Chart from 'chart.js/auto';
 import { initFFTChart, fftDataUpdate } from './fftChartHandler.js';
 
-let chart_g, chart_a, chart_m;
-let fft_g,   fft_a,   fft_m;
+//let chart_g, chart_a, chart_m;
+//let fft_g,   fft_a,   fft_m;
 
-let timeIndex = 0;
+//let timeIndex = 0;
 
 const MAX_POINTS = 300;
 
@@ -15,28 +15,27 @@ const axesState = {
     z: true
 };
 
-let initialized = false;
+//let initialized = false;
 
-function setupChart(ctx) {
+function setupChart(ctx, label = 'label') {
     let chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [],
             datasets: [
                 {
-                    label: 'X',
+                    label: label+' X',
                     data: [],
                     borderColor: 'red',
                     hidden: false
                 },
                 {
-                    label: 'Y',
+                    label: label+' Y',
                     data: [],
                     borderColor: 'green',
                     hidden: false
                 },
                 {
-                    label: 'Z',
+                    label: label+' Z',
                     data: [],
                     borderColor: 'blue',
                     hidden: false
@@ -104,38 +103,34 @@ function createControlsAxes(chart) {
 
 	return container;
 }
-
+/*
 export function initFFTCharts() {
-    fft_g = initFFTChart('fft_g');
-    fft_a = initFFTChart('fft_a');
-    fft_m = initFFTChart('fft_m');
+    fft_g = initFFTChart('fft_g', 'FFT g');
+    fft_a = initFFTChart('fft_a', 'FFT a');
+    fft_m = initFFTChart('fft_m', 'FFT m');
 }
-
-export function initChart(elementId) {
-	const element = document.getElementById(elementId);
-	
-	//console.log(elementId, element);
-
-    const ctx = element.getContext('2d');
-	const chart = setupChart(ctx);
-    element.parentNode.insertBefore(createControlsAxes(chart), element);
+*/
+export function initChart(canvas, label='label') {
+    const ctx = canvas.getContext('2d');
+	const chart = setupChart(ctx, label);
+    canvas.parentNode.insertBefore(createControlsAxes(chart), canvas);
     return chart;
 }
-
+/*
 export function initCharts() {
-	chart_g = initChart('chart_g');
-	chart_a = initChart('chart_a');
-	chart_m = initChart('chart_m');
+	chart_g = initChart('chart_g', 'g');
+	chart_a = initChart('chart_a', 'a');
+	chart_m = initChart('chart_m', 'm');
 	
 	initFFTCharts();
 }
-
-function axesDataUpdate(data, chart) {
+*/
+export function axesDataUpdate(chart, data, timeIndex) {
 	//console.log('axesDataUpdate',data, chart);
 	
     if (chart)
     {
-		chart.data.labels.push(timeIndex++);
+		chart.data.labels.push(timeIndex);
 		chart.data.datasets[0].data.push(data.x);
 		chart.data.datasets[1].data.push(data.y);
 		chart.data.datasets[2].data.push(data.z);
@@ -153,6 +148,9 @@ function axesDataUpdate(data, chart) {
 		autoScale(chart);
 
 		chart.update('none');
+	}else 
+	{
+		console.log('chart none')
 	}
 }
 
@@ -176,36 +174,27 @@ function autoScale(chart) {
     chart.options.scales.y.min = min - padding;
     chart.options.scales.y.max = max + padding;
 }
-
+/*
 export function dataUpdate(data) {
 
 	if(data.imu)
 	{
 		if(data.imu.g)
 		{
-			axesDataUpdate(data.imu.g, chart_g);
+			axesDataUpdate(chart_g, data.imu.g);
 			fftDataUpdate('g', data.imu.g);
 		}
 		
 		if(data.imu.a)
 		{
-			axesDataUpdate(data.imu.a, chart_a);
+			axesDataUpdate(chart_a, data.imu.a);
 			fftDataUpdate('a', data.imu.a);
 		}
 	}
-/*
-	if(data.m)
-	{
-		if(data.m)
-		{
-			axesDataUpdate(data.m, chart_m);
-			fftDataUpdate('m', data.imu.m);
-		}
-	}
-	*/
+
 }
 
-
+*/
 
 
 

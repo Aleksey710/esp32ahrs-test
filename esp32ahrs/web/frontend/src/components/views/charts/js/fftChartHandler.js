@@ -12,13 +12,14 @@ const FFT_SIZE = 512; // можно менять
 // freq = i * Fs / FFT_SIZE
 
 // ================= STATE =================
-const fftBuffers = {
-    g: { x: [], y: [], z: [] },
-    a: { x: [], y: [], z: [] },
-    m: { x: [], y: [], z: [] }
-};
+//const fftBuffers = {
+//	x: [], y: [], z: []
+//    g: { x: [], y: [], z: [] },
+//    a: { x: [], y: [], z: [] },
+//    m: { x: [], y: [], z: [] }
+//};
 
-const fftCharts = {};
+//const fftCharts = {};
 
 // ================= FFT =================
 // простая (не самая быстрая) реализация FFT
@@ -67,15 +68,15 @@ function computeFFT(data) {
 }
 
 // ================= CHART =================
-function createFFTChart(ctx) {
+export function createFFTChart(ctx, label='label') {
     return new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
             datasets: [
-                { label: 'X', data: [] },
-                { label: 'Y', data: [] },
-                { label: 'Z', data: [] }
+                { label: label+' X', data: [] },
+                { label: label+' Y', data: [] },
+                { label: label+' Z', data: [] }
             ]
         },
         options: {
@@ -90,50 +91,43 @@ function createFFTChart(ctx) {
 }
 
 // ================= INIT =================
-export function initFFTChart(elementId) {
-    const canvas = document.getElementById(elementId);
+export function initFFTChart(canvas, label = 'label') {
     const ctx = canvas.getContext('2d');
 
-    const chart = createFFTChart(ctx);
-    fftCharts[elementId] = chart;
+    const chart = createFFTChart(ctx, label);
+    //fftCharts[canvas] = chart;
 
     return chart;
 }
 
 // ================= UPDATE =================
-export function fftDataUpdate(type, data) {
-	//console.log('fftDataUpdate', type, data)
+export function fftDataUpdate(chart, fftBuffers, data) {
+	//console.log('fftDataUpdate', data)
 	
 	if (!data || data.x === undefined || data.y === undefined || data.z === undefined) {
         console.warn('FFT skip invalid data:', data);
         return;
     }
-	
-    const buf = fftBuffers[type];
 
     ['x', 'y', 'z'].forEach(axis => {
-        buf[axis].push(data[axis]);
+        fftBuffers[axis].push(data[axis]);
 
-        if (buf[axis].length > FFT_SIZE) {
-            buf[axis].shift();
+        if (fftBuffers[axis].length > FFT_SIZE) {
+            fftBuffers[axis].shift();
         }
     });
 
     // считаем FFT только когда накопили достаточно
-    if (buf.x.length === FFT_SIZE) {
-        updateFFTChart(type);
+    if (fftBuffers.x.length === FFT_SIZE) {
+        updateFFTChart(chart, fftBuffers);
     }
 }
 
-function updateFFTChart(type) {
-    const chart = fftCharts[`fft_${type}`];
-    if (!chart) return;
+function updateFFTChart(chart, fftBuffers) {
 
-    const buf = fftBuffers[type];
-
-    const fx = computeFFT(buf.x);
-    const fy = computeFFT(buf.y);
-    const fz = computeFFT(buf.z);
+    const fx = computeFFT(fftBuffers.x);
+    const fy = computeFFT(fftBuffers.y);
+    const fz = computeFFT(fftBuffers.z);
 
     const half = FFT_SIZE / 2;
 

@@ -2,6 +2,8 @@ import * as ws from './websocketHandler.js';
 //import * as dv from './3DView.js';
 import * as tv from './tableHandler.js';
 import * as cv from './chartHandler.js';
+import * as menu from './menu.js';
+import * as tree from './tree.js';
 
 /*
 console.log('MAIN JS EXEC', Date.now());
@@ -38,6 +40,9 @@ renderLoop();
 */
 
 function setup() {
+	
+	const sidebar = document.getElementById('sidebar');
+	tree.createTree(sidebar, menu.menu);
 	//console.log('setup start...', location.hostname);
 	cv.initCharts();
 	//dv.init3DView();
