@@ -29,3 +29,12 @@ npm run build
    npm install
    npm run build
    gzip -kf dist/*.js dist/*.html dist/*.css
+
+# Включить флаги для поддржки в браузера
+chrome://flags/#enable-web-bluetooth
+https://googlechrome.github.io/samples/web-bluetooth/scan.html
+https://vueuse.org/core/useBluetooth/
+
+
+chrome://flags/#canvas-draw-element
+chrome://flags/#enable-webgl-draft-extensions

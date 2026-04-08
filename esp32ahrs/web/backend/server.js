@@ -22,7 +22,7 @@ function generateData(t) {
 				imu:{
 					g:{
 						x: (Math.random() * 2 - 1),
-						y: Math.random() * 2 - 1,
+						y: Math.random() * 2 - 2,
 						z: Math.random() * 2 - 1
 
 					},
@@ -61,13 +61,19 @@ function generateData(t) {
 			};
 		case 'sin':
 		default:
+		{
+			const g_Ampl = 100;
+			const g_x_period = 0.9;
+			const g_y_period = 0.6;
+			const g_z_period = 0.3;
+			
 			return {
 				timestamp: Date.now(),
 				imu:{
 					g:{
-						x: Math.sin(t * 0.5) + noise(),
-						y: Math.cos(t * 0.6) + noise(),
-						z: Math.sin(t * 0.7) + noise()
+						x: Math.sin(t * g_x_period) * g_Ampl + 30 + noise(),
+						y: Math.cos(t * g_y_period) * g_Ampl + 60 + noise(),
+						z: Math.sin(t * g_z_period) * g_Ampl + 90 + noise()
 					},
 					a:{
 						x: Math.sin(t * 0.5) + noise(),
@@ -81,6 +87,7 @@ function generateData(t) {
 					z: Math.sin(t * 0.7) + noise()
 				}
 			};
+		}	
 	};
 }
 
