@@ -3,7 +3,7 @@
 		<h2>Гироскоп</h2>
 		<canvas id="raw_chart" ref="raw_chart_canvas" width="800" height="150"></canvas>
 		<div>*данные по частотному анализу появляются после накопления данных</div>
-		<canvas id="fft_chart" ref="fft_chart_canvas" width="800" height="150"></canvas>
+		<canvas id="fft_chart" ref="fft_chart_canvas" width="800" height="100"></canvas>
 		<div ref="treeScene_canvas" width="800" height="200"></div>
 	</div>
 	<div>

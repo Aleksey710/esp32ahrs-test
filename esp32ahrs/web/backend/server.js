@@ -62,8 +62,8 @@ function generateData(t) {
 		case 'sin':
 		default:
 		{
-			const g_Ampl = 30;
-			const g_faza_use = 0; // 0 or 1
+			const g_Ampl = 20;
+			const g_faza_use = 1; // 0 or 1
 			
 			const g_x_period = 0.7;
 			const g_y_period = 0.7;
@@ -73,9 +73,9 @@ function generateData(t) {
 				timestamp: Date.now(),
 				imu:{
 					g:{
-						x: Math.sin(t * g_x_period) * g_Ampl + (30 * g_faza_use) + noise(),
-						y: Math.cos(t * g_y_period) * g_Ampl + (60 * g_faza_use) + noise(),
-						z: Math.sin(t * g_z_period) * g_Ampl + (90 * g_faza_use) + noise()
+						x: Math.sin(t * g_x_period) * g_Ampl + (10 * g_faza_use) + noise(),
+						y: Math.cos(t * g_y_period) * g_Ampl + (30 * g_faza_use) + noise(),
+						z: Math.sin(t * g_z_period) * g_Ampl + (50 * g_faza_use) + noise()
 					},
 					a:{
 						x: Math.sin(t * 0.5) + noise(),
