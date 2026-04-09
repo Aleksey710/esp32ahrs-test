@@ -6,6 +6,7 @@
 #include "config_fs.h"
 #include "config_i2c.h"
 #include "config_wifi.h"
+#include "config_bluetooth.h"
 
 //----------------------------------------------------------------------
 #define VERSION "2026-03"

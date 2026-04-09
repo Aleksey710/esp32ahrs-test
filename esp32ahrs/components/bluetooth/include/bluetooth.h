@@ -1,16 +1,21 @@
-#ifndef WEBSERVER_H
-#define WEBSERVER_H
+#ifndef BLUETOOTHE_H
+#define BLUETOOTHE_H
 //----------------------------------------------------------------------
 #include <inttypes.h>
 
-#include "freertos/FreeRTOS.h" // ВСЕГДА ПЕРВЫЙ
-#include "freertos/queue.h"
+#include <stdio.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 
-#include "ws_msg.h"
+#include "esp_system.h"
+#include "esp_log.h"
+
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-void start_webserver(const int cpuId);
+void ble_init(const int cpuId);
 //----------------------------------------------------------------------
-#endif // WEBSERVER_H
+#endif // BLUETOOTHE_H

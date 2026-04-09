@@ -342,7 +342,7 @@ static void ws_ping_task(void *arg)
     }
 }
 //----------------------------------------------------------------------
-void start_webserver(const int cpuid)
+void start_webserver(const int cpuId)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
@@ -413,11 +413,11 @@ void start_webserver(const int cpuid)
 
     //------------------------------------------------------------------
     // xTaskCreate(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL);
-    // xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL, cpuid);
-    xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 8192, NULL, 5, NULL, cpuid);
+    // xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 4096, NULL, 5, NULL, cpuId);
+    xTaskCreatePinnedToCore(ws_sender_task, "ws_sender", 8192, NULL, 5, NULL, cpuId);
 
     // xTaskCreate(ws_ping_task, "ws_ping", 2048, NULL, 5, NULL);
-    // xTaskCreatePinnedToCore(ws_ping_task, "ws_ping", 2048, NULL, 5, NULL, cpuid);
+    // xTaskCreatePinnedToCore(ws_ping_task, "ws_ping", 2048, NULL, 5, NULL, cpuId);
 }
 //----------------------------------------------------------------------
 /*

@@ -3,6 +3,7 @@
 #include "freertos/queue.h"
 
 #include "esp_log.h"
+#include "nvs_flash.h"
 
 #include "fs.h"
 
@@ -24,6 +25,7 @@
 // #include <adxl345.h>
 // #include "adxl345_test.h"
 
+#include "bluetooth.h"
 //----------------------------------------------------------------------
 QueueHandle_t i2c_queue;
 
@@ -44,12 +46,15 @@ void app_main(void)
     ws_msg_ringbuf_setup();
 
     //------------------------------------------------------------------
+    // Без него не работает Bt, WiFi и fs
+    ESP_ERROR_CHECK(nvs_flash_init());
+    //------------------------------------------------------------------
     int cpuId;
     //------------------------------------------------------------------
     // --- CORE 0 ---
     cpuId = 0;
 
-    ESP_LOGI(TAG, "CORE 0 initing");
+    ESP_LOGI(TAG, "CORE %d initing", cpuId);
 
     //------------------
     littlefs_init(); //
@@ -57,6 +62,8 @@ void app_main(void)
     //------------------
 
     wifi_init();
+
+    ble_init(cpuId);
 
     start_webserver(cpuId);
 
@@ -66,7 +73,7 @@ void app_main(void)
     //------------------------------------------------------------------
     // --- CORE 1 ---
     cpuId = 1;
-    ESP_LOGI(TAG, "CORE 1 initing");
+    ESP_LOGI(TAG, "CORE %d initing", cpuId);
 
     // i2c_init(cpuId);
     /*
@@ -80,6 +87,9 @@ void app_main(void)
     // qmc5883l_test_start(cpuId);
 
     // adxl345_test_start(cpuId);
+
+    //------------------------------------------------------------------
+
     //------------------------------------------------------------------
 }
 //----------------------------------------------------------------------

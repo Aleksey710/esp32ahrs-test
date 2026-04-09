@@ -36,26 +36,36 @@ encrypted-storage-flash	 | если encryption
 ## Работа с WebSocket
 Решение: включить WebSocket в menuconfig
 
-Открой конфиг:
-
 idf.py menuconfig
-
-Дальше:
 
 Component config
   → HTTP Server
-     → [ ] WebSocket support   ← ВКЛЮЧИТЬ
+     → [*] WebSocket support 
+     
+     
+## Bluetooth 
+idf.py menuconfig
 
-Поставь:
+Component config →
+    Bluetooth →
+        [*] Bluetooth
 
-[*] WebSocket support
+        Host →
+            NimBLE - Enabled
+
+        Controller Options →
+            Mode: BLE Only
+
+Bluedroid → OFF
+
 
 ## Работа файловой системы
 Задать размер Flash size. (Зависит от контроллера)
 
 idf.py menuconfig
 
-→ Serial flasher config → Flash size → 16MB
+→ Serial flasher config → 
+	Flash size → 16MB
 //----------------------------------------------------------------------
 # SPIFFS
 Включи в menuconfig:

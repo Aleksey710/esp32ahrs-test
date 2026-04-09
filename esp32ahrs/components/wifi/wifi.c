@@ -6,7 +6,7 @@
 
 #include "config_wifi.h"
 //----------------------------------------------------------------------
-static const char *TAG = "WIFI";
+static const char *TAG = "WiFi";
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
@@ -34,7 +34,9 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
 //----------------------------------------------------------------------
 void wifi_init(void)
 {
-    nvs_flash_init();
+    // NVS
+    // ESP_ERROR_CHECK(nvs_flash_init());
+
     esp_netif_init();
     esp_event_loop_create_default();
 

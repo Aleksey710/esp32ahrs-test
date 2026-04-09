@@ -6,6 +6,7 @@ idf_component_register(
 		"."
 
     REQUIRES 	
+		nvs_flash
 		esp_littlefs
 		#esp_partition
 		#spi_flash
@@ -26,6 +27,7 @@ idf_component_register(
 		wifi
 		webserver
 		i2c
+		bluetooth
 
 		MPU6050
 		QMC5883
