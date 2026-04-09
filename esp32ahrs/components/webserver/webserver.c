@@ -294,7 +294,7 @@ static void ws_sender_task(void *arg)
         if (msg_ptr)
         {
             Ws_msg_t *msg = *msg_ptr;
-            ESP_LOGI(TAG, "Received: %s", msg->str);
+            // ESP_LOGI(TAG, "Received: %s", msg->str);
 
             //--------------------
             send_ws_msg(msg->str, msg->len);

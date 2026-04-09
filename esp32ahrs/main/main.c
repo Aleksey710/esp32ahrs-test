@@ -7,6 +7,7 @@
 
 #include "fs.h"
 
+#include "print_task_list.h"
 #include "wifi.h"
 #include "webserver.h"
 #include "i2c.h"
@@ -89,7 +90,7 @@ void app_main(void)
     // adxl345_test_start(cpuId);
 
     //------------------------------------------------------------------
-
+    print_task_list_task_start(cpuId);
     //------------------------------------------------------------------
 }
 //----------------------------------------------------------------------
