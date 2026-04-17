@@ -254,7 +254,8 @@ void send_ws_msg(char *json_str, int json_str_len)
         {
             esp_err_t ret = httpd_ws_send_frame_async(server, ws_clients[i], &frame);
 
-            ESP_LOGI(TAG, "ws_sender_task sended[%s]", json_str);
+            // ESP_LOGI(TAG, "ws_sender_task sended[%s]", json_str);
+
             if (ret != ESP_OK)
             {
                 ws_clients[i] = -1; // клиент отключился

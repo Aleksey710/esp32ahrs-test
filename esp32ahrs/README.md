@@ -3,10 +3,39 @@
 | Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-S2 | ESP32-S3 |
 | ----------------- | ----- | -------- | -------- | -------- | -------- |
 
+## Вводная 
+Вдохновение информация и куски кода почерпнуты в:
+| ------------------------------------------- | ----- |
+| git | Описание |
+| ------------------------------------------- | ----- |
+| https://github.com/well-techn/Aquila | https://www.youtube.com/@well_techn | 
+| https://github.com/iNavFlight/inav |  | 
+| https://github.com/betaflight/betaflight |  | 
+| https://github.com/qqqlab/madflight | https://madflight.com | 
+| https://github.com/rtlopez/esp-fc |  | 
+| https://github.com/okalachev/flix | https://quadcopter.dev | 
+| 
 
-esp32imu - проект для ESP32
+
+Большое спасибо @well_techn [https://www.youtube.com/@well_techn] 
+за подробное и понятное объяснение сложных вещей простым языком.
+
+## Описание проекта
+esp32ahrs - проект для ESP32
 docs - проект документации
 docker - развертывание документации
+
+Проект разрабатывается в VS ESP-IDF v.6.0.0.
+
+Плата разработки ESP32-S3-N16R8 (GOOUUU ESP32-S3-CAM).
+
+Полноценная сборка(включая web) происходит под Linux (смотреть [esp32ahrs/main/CMakeLists.txt]).
+Но уже собранная часть из крайнего git push попадает в [esp32ahrs/build/storage/frontend],
+как и собранные [esp32ahrs/build/esp32ahrs.elf], [esp32ahrs/build/esp32ahrs.bin].
+
+Конфигурация I2C:     [esp32ahrs/components/config/include/config_i2c.h]
+Конфигурация WiFi:    [esp32ahrs/components/config/include/config_wifi.h]
+
 
 ## Заметки
 
@@ -42,7 +71,7 @@ Component config
   → HTTP Server
      → [*] WebSocket support 
      
-     
+//----------------------------------------------------------------------
 ## Bluetooth 
 idf.py menuconfig
 
@@ -58,7 +87,7 @@ Component config →
 
 Bluedroid → OFF
 
-
+//----------------------------------------------------------------------
 ## Работа файловой системы
 Задать размер Flash size. (Зависит от контроллера)
 
@@ -113,7 +142,7 @@ pip install littlefs-python
 Собираем проект заново
 idf.py fullclean
 idf.py build
-
+//----------------------------------------------------------------------
 # где прописан FS_BASE_PATH
 
 CONFIG_FS.h
@@ -134,7 +163,7 @@ partitions.csv
 sdkconfig
 sdkconfig.defaults
 sdkconfig.old
-
+//----------------------------------------------------------------------
 ## Driver for MPU6000/MPU6050 6-axis MotionTracking device.
 
 https://components.espressif.com/components/esp-idf-lib/mpu6050/versions/2.1.3/readme?language=en
@@ -144,7 +173,7 @@ https://github.com/esp-idf-lib/mpu6050/blob/main/examples/default/README.md
 #Installation
 idf.py add-dependency esp-idf-lib/mpu6050
 
-
+//----------------------------------------------------------------------
 # альтернативная установка в git проект
 git submodule add https://github.com/esp-idf-lib/mpu6050.git
 git submodule update --init --recursive
@@ -154,7 +183,25 @@ git submodule update --init --recursive
 
 | Дата | Изменения |
 | ----------- | --------- |
-
+| - |
+| - |
+| - |
+| - |
+| - | - Добавление обработки фильтром Маджвика 
+| - | - Добавление обработки фильтром Калмана 
+| - | - Добавление поддержки MultiWii Serial Protocol (MSP) по Bluetooth
+| 2026/04/13 |  - данные отображаются на фронте.
+| - | Разработка интерфейса ведется с использованием vue
+| - | работает получение данных от MPU6050 и выдача вебинтерфейса по websocket
+| - | данные выводятся на графике данных, графике частотного анализа данных и пространственная ориентация в 3D
+| - | добавлена 3D модель для отображения [квадрокоптер из Betaflight Configutator]
+| - | добавлена поддержка обнаружения по Bluetooth
+| - | 
+| - | 
+| - | 
+| - | 
+| - | 
+| - | 
 | 2026/03/27 |  - работает webserver. Файлы из /storage [LittleFS]
 | 2026/03/26 |  - Начало проекта
 

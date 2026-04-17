@@ -3,6 +3,8 @@
 .vscode/*
 build/*
 !build/storage/
+!build/esp32ahrs.bin
+!build/esp32ahrs.elf
 
 managed_components/*
 storage_test/*
