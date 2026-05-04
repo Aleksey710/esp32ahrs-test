@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": false,
+
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "esModuleInterop": true,
+        
+        "strict": true,
+        "jsx": "preserve",
+
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["frontend/src/*"],
+            "@components/*": ["frontend/src/components/*"],
+            "@utils/*": ["frontend/src/utils/*"]
+        },
+
+        "types": ["node"],
+        "skipLibCheck": true
+    },
+    "scripts": {
+        "type-check": "vue-tsc --noEmit"
+    },
+    "include": [
+        "frontend/**/*.ts", 
+        "frontend/**/*.tsx",
+        "frontend/**/*.js", 
+        "frontend/**/*.vue",
+        "backend/**/*.ts", 
+        "backend/**/*.js",
+        "scripts/**/*.ts", 
+        "scripts/**/*.js"
+    ],
+    "exclude": ["node_modules", "dist", "asyncapi"]
+}

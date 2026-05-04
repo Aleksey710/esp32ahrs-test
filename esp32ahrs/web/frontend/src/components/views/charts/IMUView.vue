@@ -20,6 +20,15 @@
 </template>
 
 <script setup>
+
+/*
+Если хочешь, я могу дальше:
+
+объединить gyro + accel + mag в один универсальный view-компонент
+убрать дублирование полностью (будет ~70% меньше кода)
+сделать scalable telemetry dashboard (как в avionics UI)
+*/
+
 //import * as dv from './js/3DView.js';
 import { ref, onMounted } from 'vue'
 import Chart from 'chart.js/auto'

@@ -1,62 +1,134 @@
 <template>
 	<div>
 		<h2>Акселерометр</h2>
-		<canvas id="raw_chart" ref="raw_chart_canvas" width="800" height="200"></canvas>
-		<div>*данные по частотному анализу появляются после накопления данных</div>
-		<canvas id="fft_chart" ref="fft_chart_canvas" width="800" height="200"></canvas>
+
+		<canvas
+			id="raw_chart"
+			ref="raw_chart_canvas"
+			width="800"
+			height="200"
+		/>
+
+		<div>
+			*данные по частотному анализу появляются после накопления данных
+		</div>
+
+		<canvas
+			id="fft_chart"
+			ref="fft_chart_canvas"
+			width="800"
+			height="200"
+		/>
 	</div>
+
 	<div>
 		<table id="raw_table"></table>
 	</div>
 </template>
 
-<script setup>
-//import * as dv from './js/3DView.js';
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
 import Chart from 'chart.js/auto'
 
-import * as tv from './js/tableHandler.js';
-import { initChart, axesDataUpdate } from './js/chartHandler.js';
-import { initFFTChart, fftDataUpdate } from './js/fftChartHandler.js';
+// ----------------------------------------------------------------------
+// Imports
 
-import { watch } from 'vue'
-import { useWebSocket } from '@/composables/useWebSocket.js'
-//----------------------------------------------------------------------
-let timeIndex = 0;
+import * as tv from './js/tableHandler'
 
-const MAX_POINTS = 300;
+import { initChart, axesDataUpdate } from './js/chartHandler'
+import { initFFTChart, fftDataUpdate } from './js/fftChartHandler'
 
-// состояние осей
+import { useWebSocket } from '@/composables/useWebSocket'
+
+// ----------------------------------------------------------------------
+// Types
+
+type AxisVector = {
+	x: number
+	y: number
+	z: number
+}
+
+type IMUState = {
+	a: AxisVector
+}
+
+type WebSocketState = {
+	imu: IMUState
+}
+
+// ----------------------------------------------------------------------
+// State
+
+let timeIndex: number = 0
+
+const MAX_POINTS: number = 300
+
 const axesState = {
-    x: true,
-    y: true,
-    z: true
-};
+	x: true,
+	y: true,
+	z: true
+}
 
-let initialized = false;
+let initialized: boolean = false
 
-const raw_chart_canvas = ref(null);
-const fft_chart_canvas = ref(null)
+// ----------------------------------------------------------------------
+// Refs
 
-let raw_chart = null;
-let fft_chart = null;
+const raw_chart_canvas = ref<HTMLCanvasElement | null>(null)
+const fft_chart_canvas = ref<HTMLCanvasElement | null>(null)
 
-onMounted(() => {
-	raw_chart = initChart(raw_chart_canvas.value, 'a');
-    fft_chart = initFFTChart(fft_chart_canvas.value, 'FFT a');
+// ----------------------------------------------------------------------
+// Charts
+
+let raw_chart: Chart | null = null
+let fft_chart: Chart | null = null
+
+// ----------------------------------------------------------------------
+// Init
+
+onMounted((): void => {
+	if (raw_chart_canvas.value) {
+		raw_chart = initChart(raw_chart_canvas.value, 'a')
+	}
+
+	if (fft_chart_canvas.value) {
+		fft_chart = initFFTChart(fft_chart_canvas.value, 'FFT a')
+	}
 })
-//----------------------------------------------------------------------
-const { state } = useWebSocket()
-const fftBuffers = { x: [], y: [], z: [] };
-const fftCharts = {};
+
+// ----------------------------------------------------------------------
+// WebSocket
+
+const { state } = useWebSocket() as {
+	state: WebSocketState
+}
+
+// ----------------------------------------------------------------------
+// FFT buffers
+
+const fftBuffers: {
+	x: number[]
+	y: number[]
+	z: number[]
+} = {
+	x: [],
+	y: [],
+	z: []
+}
+
+const fftCharts: Record<string, unknown> = {}
+
+// ----------------------------------------------------------------------
+// Watch accelerometer
 
 watch(
-	() => state.imu.a,
-	(a) => {
-		//console.log('accel:', a.x, a.y, a.z)
+	() => state.imu?.a,
+	(a): void => {
+		if (!a || !raw_chart || !fft_chart) return
 
-		axesDataUpdate(raw_chart, a, timeIndex++);
-		fftDataUpdate(fft_chart, fftBuffers, a);
+		axesDataUpdate(raw_chart, a, timeIndex++)
+		fftDataUpdate(fft_chart, fftBuffers, a)
 	},
 	{ deep: true }
 )

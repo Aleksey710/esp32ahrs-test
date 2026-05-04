@@ -4,13 +4,14 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
 
-onMounted(() => {
-	//initChart('raw_chart', 'g');
-    //initFFTChart('fft_chart', 'FFT g');
+// ----------------------------------------------------------------------
+// Lifecycle
+
+onMounted((): void => {
+	// initChart('raw_chart', 'g')
+	// initFFTChart('fft_chart', 'FFT g')
 })
-
 </script>
-

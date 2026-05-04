@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* Базовое */
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+
+    /* Выход */
+    "outDir": "dist",
+    "rootDir": "src",
+
+    /* Интероп */
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    /* Строгость (постепенно можно усиливать) */
+    "strict": false,
+    "noImplicitAny": false,
+
+    /* DX */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* CLI-специфика */
+    "declaration": false,
+    "sourceMap": false
+  },
+
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
+   

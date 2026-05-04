@@ -1,0 +1,24 @@
+{
+  "name": "asyncapi-codegen",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "bin": {
+    "asyncapi-codegen": "dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^11",
+    "fs-extra": "^11",
+    "js-yaml": "^4",
+    "chokidar": "^3"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "tsx": "^4.21.0"
+  }
+}

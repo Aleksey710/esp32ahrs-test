@@ -1,9 +1,7 @@
-//import Vue from 'vue'
-//import store from './store'
-
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router/router.js'
+import router from './router/router'
+//import store from './store'
 
 createApp(App)
   .use(router)

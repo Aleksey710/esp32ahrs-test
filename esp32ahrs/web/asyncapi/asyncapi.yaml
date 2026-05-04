@@ -1,0 +1,278 @@
+asyncapi: '3.1.0'
+
+#-----------------------------------------------------------------------
+info:
+    title: ESP32 AHRS WebSocket API
+    version: '1.1.0'
+    description: |-
+        WebSocket API for ESP32 AHRS device.
+
+        Документ описывает обмен данными между ESP32 и клиентом:
+        - телеметрия (IMU + магнитометр)
+        - heartbeat (проверка соединения)
+        - hello (инициализация)
+        - acknowledge (ответ сервера)
+
+#-----------------------------------------------------------------------
+servers:
+    production:
+        host: 192.168.234.12
+        protocol: ws
+        pathname: /link
+        description: Основной WebSocket сервер ESP32
+
+#-----------------------------------------------------------------------
+channels:
+
+    telemetry:
+        address: /telemetry
+        description: |-
+            Канал передачи телеметрии с ESP32 на клиент.
+            Содержит данные IMU и магнитометра.
+        messages:
+            ahrs:
+                $ref: '#/components/messages/ahrs'
+
+    control:
+        address: /control
+        description: |-
+            Канал управления и служебных сообщений.
+        messages:
+            hello:
+                $ref: '#/components/messages/hello'
+            acknowledge:
+                $ref: '#/components/messages/acknowledge'
+            heartbeat:
+                $ref: '#/components/messages/heartbeat'
+
+#-----------------------------------------------------------------------
+operations:
+
+    ahrs:
+        action: receive
+        summary: Получение телеметрии от ESP32
+        channel:
+            $ref: '#/channels/telemetry'
+        messages:
+            - $ref: '#/channels/telemetry/messages/ahrs'
+            
+    heartbeat:
+        action: send
+        summary: Отправка heartbeat 
+        channel:
+            $ref: '#/channels/control'
+        messages:
+            - $ref: '#/channels/control/messages/heartbeat'
+
+    sendHello:
+        action: send
+        summary: Отправка hello при подключении
+        channel:
+            $ref: '#/channels/control'
+        messages:
+            - $ref: '#/channels/control/messages/hello'
+
+    receiveAck:
+        action: receive
+        summary: Получение подтверждения
+        channel:
+            $ref: '#/channels/control'
+        messages:
+            - $ref: '#/channels/control/messages/acknowledge'
+
+#-----------------------------------------------------------------------
+components:
+
+    messages:
+
+        #-------------------------------------------------------------------
+        hello:
+            name: hello
+            title: Сообщение инициализации
+            summary: Отправляется клиентом при установке соединения
+            payload:
+                $ref: '#/components/schemas/hello'
+
+        #-------------------------------------------------------------------
+        ahrs:
+            name: AHRS
+            title: Телеметрия IMU
+            summary: |-
+                Основное сообщение с датчиков:
+                - гироскоп (g)
+                - акселерометр (a)
+                - магнитометр (m)
+            payload:
+                $ref: '#/components/schemas/ahrs'
+            examples:
+                - name: imuExample
+                  summary: Пример данных IMU
+                  payload:
+                      type: data
+                      timestamp: 1714470000000
+                      imu:
+                          g:
+                              x: 0.01
+                              y: -0.02
+                              z: 0.98
+                          a:
+                              x: 0.0
+                              y: 9.81
+                              z: 0.1
+                      m:
+                          x: 0.3
+                          y: 0.1
+                          z: -0.5
+
+        #-------------------------------------------------------------------
+        heartbeat:
+            name: heartbeat
+            title: Heartbeat
+            summary: Проверка активности соединения
+            payload:
+                $ref: '#/components/schemas/heartbeat'
+            examples:
+                - name: heartbeatExample
+                  payload:
+                      type: heartbeat
+                      timestamp: 1714470000000
+
+        #-------------------------------------------------------------------
+        acknowledge:
+            name: acknowledge
+            title: Подтверждение
+            summary: Ответ сервера на сообщение клиента
+            payload:
+                $ref: '#/components/schemas/acknowledge'
+            examples:
+                - name: ackOk
+                  payload:
+                      type: acknowledge
+                      timestamp: 1714470000000
+                      messageId: "abc123"
+                      status: ok
+
+#-----------------------------------------------------------------------
+    schemas:
+
+        #-------------------------------------------------------------------
+        base:
+            type: object
+            description: |-
+                Базовая схема для всех сообщений.
+                Все сообщения обязаны содержать:
+                - type (тип сообщения)
+                - timestamp (время в ms)
+            required:
+                - type
+                - timestamp
+            properties:
+                type:
+                    type: string
+                timestamp:
+                    type: integer
+                    description: Unix timestamp в миллисекундах
+
+        #-------------------------------------------------------------------
+        vector3:
+            type: object
+            description: Трёхмерный вектор
+            required:
+                - x
+                - y
+                - z
+            properties:
+                x:
+                    type: number
+                    description: Значение по оси X
+                y:
+                    type: number
+                    description: Значение по оси Y
+                z:
+                    type: number
+                    description: Значение по оси Z
+
+        #-------------------------------------------------------------------
+        imu:
+            type: object
+            description: |-
+                Данные инерциального измерительного блока (IMU)
+            required:
+                - g
+                - a
+            properties:
+                g:
+                    $ref: '#/components/schemas/vector3'
+                a:
+                    $ref: '#/components/schemas/vector3'
+
+        #-------------------------------------------------------------------
+        ahrs:
+            allOf:
+                - $ref: '#/components/schemas/base'
+                - type: object
+                  description: |-
+                      Основная телеметрия устройства.
+
+                      Структура:
+                      {
+                        imu: {
+                          g: {x,y,z},
+                          a: {x,y,z}
+                        },
+                        m: {x,y,z},
+                        timestamp
+                      }
+                  required:
+                      - imu
+                      - m
+                  properties:
+                      type:
+                          const: data
+                      imu:
+                          $ref: '#/components/schemas/imu'
+                      m:
+                          $ref: '#/components/schemas/vector3'
+
+        #-------------------------------------------------------------------
+        heartbeat:
+            allOf:
+                - $ref: '#/components/schemas/base'
+                - type: object
+                  properties:
+                      type:
+                          const: heartbeat
+
+        #-------------------------------------------------------------------
+        hello:
+            allOf:
+                - $ref: '#/components/schemas/base'
+                - type: object
+                  properties:
+                      type:
+                          const: hello
+                      deviceId:
+                          type: string
+                          description: Уникальный ID устройства
+                      firmware:
+                          type: string
+                          description: Версия прошивки
+
+        #-------------------------------------------------------------------
+        acknowledge:
+            allOf:
+                - $ref: '#/components/schemas/base'
+                - type: object
+                  properties:
+                      type:
+                          const: acknowledge
+                      messageId:
+                          type: string
+                          description: ID сообщения, на которое даётся ответ
+                      status:
+                          type: string
+                          enum:
+                              - ok
+                              - error
+                          description: Результат обработки сообщения
+#-----------------------------------------------------------------------

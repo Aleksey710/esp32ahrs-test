@@ -1,0 +1,328 @@
+asyncapi: '3.1.0'
+info:
+    title: AsyncAPI document for a esp32ahrs with WebSocket
+    version: '1.0.0'
+    description: |-
+        The esp32ahrs application.
+
+        # https://www.asyncapi.com/docs/tutorials/websocket/websocket-request-reply
+        # https://studio.asyncapi.com/
+    contact:
+        name: Aleksey710
+        url: 'https://github.com/Aleksey710/'
+    externalDocs:
+        url: 'https://github.com/Aleksey710/esp32ahrs-test/blob/main/esp32ahrs/web/asyncapi/asyncapi.yaml'
+#-----------------------------------------------------------------------
+servers:
+    production:
+        #host: wss-primary.slack.com
+        #host: 192.168.1.6
+        host: 192.168.234.12
+        pathname: /link
+        protocol: ws
+        #protocol: wss
+        description: esp32ahrs server in Socket Mode for real-time communication 
+    public:
+        host: 192.168.234.12
+        protocol: ws
+#-----------------------------------------------------------------------
+channels:
+#-----------------------------------------------------------------------
+    root: 
+        address: /
+        messages:
+            hello:
+                $ref: '#/components/messages/hello'
+            reaction:
+                $ref: '#/components/messages/reaction'
+            acknowledge:
+                $ref: '#/components/messages/acknowledge'
+    data_v1:
+        address: '/v1/{symbol}'
+        messages:
+            hello:
+                $ref: '#/components/messages/hello'
+            reaction:
+                $ref: '#/components/messages/reaction'
+            acknowledge:
+                $ref: '#/components/messages/acknowledge'
+        bindings:
+            ws:
+                bindingVersion: 0.1.0
+                query:
+                    type: object
+                    description: >-
+                        Tokens are produced in the WebSocket URL generated from the
+                        [apps.connections.open](https://api.slack.com/methods/apps.connections.open)
+                        method from Slack's API
+                    properties:
+                        heartbeat:
+                            type: boolean
+                            default: false
+                            description: |-
+                                Optionally add this parameter and set to true to receive a
+                                heartbeat every 5 seconds
+                        ticket:
+                            type: string
+                            description: Temporary token generated when connection is initiated
+                            const: 13748dac-b866-4ea7-b98e-4fb7895c0a7f
+                        app_id:
+                            type: string
+                            description: Unique identifier assigned to the Slack app
+                            const: fe684dfa62159c6ac646beeac31c8f4ef415e4f39c626c2dbd1530e3a690892f
+#-----------------------------------------------------------------------
+operations:
+#-----------------------------------------------------------------------
+    helloListener:
+        action: receive
+        channel:
+            $ref: '#/channels/root'
+        messages:
+            - $ref: '#/channels/root/messages/hello'
+    reactionListener:
+        action: receive
+        channel:
+            $ref: '#/channels/root'
+        messages:
+            - $ref: '#/channels/root/messages/reaction'
+        reply:
+            messages:
+                - $ref: '#/channels/root/messages/acknowledge'
+            channel:
+                $ref: '#/channels/root'
+#-----------------------------------------------------------------------
+components:
+#-----------------------------------------------------------------------
+    messages:
+#-----------------------------------------------------------------------
+        marketData:
+            summary: Message with marked data information.
+            description: |-
+                The initial response message will show the existing state of the order
+                book. Subsequent messages will show all executed trades, as well as all
+                other changes to the order book from orders placed or canceled.
+            payload:
+                $ref: '#/components/schemas/market'
+            examples:
+                - name: updateMessage
+                    summary: >-
+                        Example of an update message that contains a change in price
+                        information.
+                    payload:
+                        type: update
+                        eventId: 36902233362
+                        timestamp: '1619769673'
+                        timestampms: '1619769673527'
+                        socket_sequence: 661
+                        events:
+                            - type: change
+                              side: bid
+                              price: '54350.40'
+                              remaining: '0.002'
+                              delta: '0.002'
+                              reason: place
+                - name: heartbeatMessage
+                    summary: Example of additional heartbeat message when you enable them.
+                    payload:
+                        type: heartbeat
+                        socket_sequence: 1656
+        reaction:
+            summary: Action triggered when the channel receives a new reaction-added event
+            payload:
+                $ref: '#/components/schemas/reaction'
+        hello:
+            summary: Action triggered when a successful WebSocket connection is established
+            payload:
+                $ref: '#/components/schemas/hello'
+        acknowledge:
+            summary: Acknowledgement response sent to Server
+            payload:
+                $ref: '#/components/schemas/acknowledge'
+#-----------------------------------------------------------------------
+    schemas:
+#-----------------------------------------------------------------------
+        heartbeat:
+            allOf:
+                - properties:
+                    type:
+                       type: string
+                       const: heartbeat
+                    required:
+                        - type
+                        - $ref: '#/components/schemas/default'
+        market: 
+            type: object
+            oneOf:
+                - $ref: '#/components/schemas/heartbeat'
+                - $ref: '#/components/schemas/update'
+        hello:
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: A hello string confirming WebSocket connection
+                connection_info:
+                    type: object
+                    properties:
+                        app_id:
+                        type: string
+                num_connections:
+                    type: integer
+                debug_info:
+                    type: object
+                properties:
+                    host:
+                        type: string
+                    started:
+                        type: string
+                    build_number:
+                        type: integer
+                        approximate_connection_time:
+                type: integer
+        reaction:
+            type: object
+            properties:
+                envelope_id:
+                    type: string
+                    description: 'Unique ID assigned to payload'
+                payload:
+                    type: object
+                    description: 'Payload of the reaction added event'
+                properties:
+                    token:
+                        type: string
+                    team_id:
+                        type: string
+                    event:
+                        type: object
+                    properties:
+                        user:
+                            type: string
+                            description: User ID who performed this event
+                        reaction:
+                            type: string
+                            description: The only reaction that you need is a heart emoji
+                        item_user:
+                            type: string
+                            description: |
+                                User ID that created the original item that has been reacted
+                                to
+                        item:
+                            
+                        properties:
+                            channel:
+                                type: string
+                                description: Channel information of original message
+                                ts:
+                                    type: string
+                                    description: Timestamp information of original message
+                                event_ts:
+                                    type: string
+                                    description: Reaction timestamp
+                type:
+                type: string
+                accepts_response_payload:
+                type: boolean
+        acknowledge:
+            type: object
+            properties:
+                envelope_id:
+                    type: string
+                    description: 'Unique ID of acknowledged payload'
+                    payload:
+                        type: object
+                        description: 'Optional payload of event' 
+        update:
+            allOf:
+                - properties:
+                    type:
+                        type: string
+                        const: update
+                    eventId:
+                        type: integer
+                        description: |-
+                            A monotonically increasing sequence number indicating when this
+                            change occurred. These numbers are persistent and consistent
+                            between market data connections.
+                    events:
+                        $ref: '#/components/schemas/events'
+                    timestamp:
+                        type: string
+                        format: date-time
+                        description: |-
+                            The timestamp in seconds for this group of events (included for
+                            compatibility reasons). We recommend using the timestampms field
+                            instead.
+                    timestampms:
+                        type: string
+                        format: time
+                        description: The timestamp in milliseconds for this group of events.
+                        required:
+                            - type
+                            - eventId
+                            - events
+                            - timestamp
+                            - timestampms
+                - $ref: '#/components/schemas/default'
+        events:
+            type: array
+            description: |-
+                Either a change to the order book, or the indication that a trade has
+                occurred.
+            items:
+            type: object
+            additionalProperties: false
+            properties:
+                type:
+                    type: string
+                    enum:
+                        - trade
+                        - change
+                        - 'auction, block_trade'
+        price:
+            type: number
+            multipleOf: 1
+            description: The price of this order book entry.
+            side:
+                type: string
+                enum:
+                    - bid
+                    - side
+            reason:
+                type: string
+                enum:
+                    - place
+                    - trade
+                    - cancel
+                    - initial
+                description: |-
+                    Indicates why the change has occurred. initial is for the initial
+                    response message, which will show the entire existing state of the
+                    order book.
+        remaining:
+            type: number
+            multipleOf: 1
+            description: |-
+                The quantity remaining at that price level after this change
+                occurred. May be zero if all orders at this price level have been
+                filled or canceled.
+        delta:
+            type: number
+            multipleOf: 1
+            description: |-
+                The quantity changed. May be negative, if an order is filled or
+                canceled. For initial messages, delta will equal remaining.
+        default:
+            type: object
+            description: |-
+                This object is always part of the payload. In case of type=heartbeat,
+                these are the only fields.
+            required:
+                - type
+                - socket_sequence
+            properties:
+                socket_sequence:
+                    type: integer
+                    description: >-
+                        zero-indexed monotonic increasing sequence number attached to each
+
